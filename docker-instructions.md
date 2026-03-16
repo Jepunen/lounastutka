@@ -69,9 +69,11 @@ For longer-term monitoring, use Grafana and Loki rather than raw service logs.
 
 - Application via Traefik: `http://localhost`
 - Traefik dashboard: `http://localhost:8080`
-- Grafana: `http://localhost:3000`
+- Grafana: `http://localhost:3000` or `http://127.0.0.1:3000`
 - Prometheus: internal-only by default
 - Loki: internal-only by default
+
+If Grafana hangs on `http://localhost:3000`, your host likely resolves `localhost` to `::1` first and the Swarm ingress path may stall on IPv6. Use `http://127.0.0.1:3000` instead (or force IPv4 in your browser).
 
 Default Grafana credentials are `admin` / `admin` unless changed.
 
