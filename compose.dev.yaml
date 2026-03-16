@@ -1,0 +1,40 @@
+services:
+  backend:
+    image: oven/bun:1
+    working_dir: /app
+    command: sh -lc "bun install && bun --watch index.ts"
+    volumes:
+      - ./Backend:/app
+      - backend_node_modules:/app/node_modules
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+
+  frontend:
+    image: oven/bun:1
+    working_dir: /app
+    command: sh -lc "bun install && bun run dev --host 0.0.0.0"
+    volumes:
+      - ./Frontend:/app
+      - frontend_node_modules:/app/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: lounastutka
+      POSTGRES_PASSWORD: secretpassword
+      POSTGRES_DB: lounastutka
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data_dev:/var/lib/postgresql/data
+
+volumes:
+  backend_node_modules:
+  frontend_node_modules:
+  pg_data_dev:
