@@ -9,7 +9,7 @@ WORKDIR /app
 
 COPY --from=deps /app/node_modules /app/node_modules
 COPY . /app
-RUN npm run build
+RUN bun run build
 
 FROM nginx:1.27-alpine
 COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
