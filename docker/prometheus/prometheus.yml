@@ -9,4 +9,4 @@ scrape_configs:
 
   # - job_name: 'bun_app'
   #   static_configs:
-  #     - targets: ['app:3000'] # Assuming your Bun app exposes metrics
+  #     - targets: ['app:3001'] # Assuming your Bun app exposes metrics
