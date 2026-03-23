@@ -68,7 +68,7 @@ For longer-term monitoring, use Grafana and Loki rather than raw service logs.
 ### 5. Access the Services
 
 - Application via Traefik: `http://localhost`
-- Traefik dashboard: `http://localhost:8080`
+- Traefik dashboard: `https://dashboard.swarm.localhost/`
 - Grafana: `http://localhost:3000` or `http://127.0.0.1:3000`
 - Prometheus: internal-only by default
 - Loki: internal-only by default
