@@ -1,4 +1,4 @@
-# Lounastutka HEIEIIE
+# Lounastutka
 
 Lounastutka is a containerized full-stack app with:
 
