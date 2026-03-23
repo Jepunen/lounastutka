@@ -1,23 +1,47 @@
-# Welcome to MkDocs
+# Lounastutka HEIEIIE
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+Lounastutka is a containerized full-stack app with:
 
-## Commands
+- Frontend: React Router app
+- Backend: Bun HTTP service
+- Database: PostgreSQL
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+The repository includes two deployment modes:
 
-## Project layout
+- Local development with Docker Compose
+- Production-style Docker Swarm stack with Traefik and monitoring services
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+## Services Overview
 
+Development (`compose.dev.yaml`):
 
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:3001`
+- PostgreSQL: `localhost:5432`
 
-## Test addition
+Swarm (`compose.yaml`):
 
-This section exists as a means to test the documentation and should not be left as is to the final version.
+- Traefik edge router: `http://localhost`
+- Traefik dashboard: `http://localhost:8080`
+- Grafana: `http://localhost:3000`
+- Prometheus and Loki are internal by default
+
+## Documentation Map
+
+- Installation and run instructions: [Installation](installation.md)
+- Frontend module notes: [Frontend](frontend/index.md)
+- Backend module notes: [Backend](backend/index.md)
+
+## Build Documentation
+
+From repository root:
+
+```bash
+mkdocs build
+```
+
+Serve locally with live reload:
+
+```bash
+mkdocs serve
+```
