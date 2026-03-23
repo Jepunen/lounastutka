@@ -94,9 +94,9 @@ For longer-term monitoring, use Grafana and Loki rather than raw service logs.
 
 ### Access the services
 
-- Application via Traefik: `https://<your-domain>`
-- Traefik dashboard: `https://dashboard.swarm.localhost/`
-- Grafana: `http://<server-ip>:3000` (port 3000 on the Hetzner server)
+- Application via Traefik: `https://lounastutka.fi`
+- Traefik dashboard: `https://dashboard.swarm.lounastutka.fi/`
+- Grafana: `http://lounastutka.fi:3000` (port 3000 on the Hetzner server)
 - Prometheus: internal-only by default
 - Loki: internal-only by default
 
