@@ -1,52 +1,61 @@
 # Docker Instructions for Lounastutka
 
-This repository now has two Docker entry points:
+This repository has two Docker entry points:
 
-- `compose.yaml` for Docker Swarm deployment with `docker stack deploy`
-- `compose.dev.yaml` for local development with `docker compose up`
+- `compose.yaml` — Docker Swarm production deployment (deployed automatically via GitHub Actions)
+- `compose.dev.yaml` — local development with `docker compose up`
 
-## Swarm Deployment
+## CI/CD — GitHub Actions (normal deployment flow)
 
-The Swarm stack includes:
+Production deployments are fully automated. Pushing to `main`:
 
-- **traefik**: edge router and load balancer
-- **frontend**: React frontend served by Nginx
-- **app**: Bun backend from `./Backend`
-- **db**: PostgreSQL
-- **prometheus**: metrics collection
-- **loki**: log aggregation
-- **grafana**: dashboards and log viewing
+1. Builds the backend and frontend Docker images on GitHub's servers
+2. Pushes them to GitHub Container Registry (`ghcr.io`)
+3. SSHs into the Hetzner server and runs `docker stack deploy`
 
-### 1. Initialize Swarm
+**You do not need to build or push images manually.** Just push to `main`.
 
-Run this once on the manager node:
+### Required repository secrets
+
+Set these under **Settings → Secrets → Actions** in the GitHub repository:
+
+| Secret | Value |
+|---|---|
+| `HETZNER_HOST` | IP or hostname of the Hetzner server |
+| `HETZNER_USER` | SSH user on the server (e.g. `root`) |
+| `HETZNER_SSH_KEY` | Private SSH key (matching public key must be on the server) |
+| `POSTGRES_PASSWORD` | Production database password |
+
+`GITHUB_TOKEN` is provided automatically by GitHub — do not add it manually.
+
+### One-time server setup
+
+Run these once on the Hetzner server:
 
 ```bash
 docker swarm init
+mkdir -p /opt/lounastutka
+cd /opt/lounastutka
+git clone <repo-url> .
 ```
 
-If needed, specify the advertised interface explicitly:
+---
+
+## Manual Swarm Deployment (advanced / emergency)
+
+If you need to deploy manually without GitHub Actions, images must first exist in the registry.
+Pull the images on the server and then deploy:
 
 ```bash
-docker swarm init --advertise-addr <IP_ADDRESS>
+export IMAGE_TAG=<git-sha-or-latest>
+export GITHUB_REPOSITORY=<owner>/<repo>
+export POSTGRES_PASSWORD=<password>
+
+echo "<ghcr-token>" | docker login ghcr.io -u <github-username> --password-stdin
+docker stack deploy -c compose.yaml lounastutka --with-registry-auth
 ```
 
-### 2. Deploy the Stack
-
-Build the backend and frontend images from the repository root:
-
-```bash
-docker build -t lounastutka-backend:latest ./Backend
-docker build -t lounastutka-frontend:latest ./Frontend
-```
-
-Then deploy the stack:
-
-```bash
-docker stack deploy -c compose.yaml lounastutka
-```
-
-### 3. Verify the Deployment
+### Verify the deployment
 
 ```bash
 docker stack ls
@@ -55,7 +64,7 @@ docker service ps lounastutka_app
 docker service ps lounastutka_frontend
 ```
 
-### 4. View Logs
+### View logs
 
 ```bash
 docker service logs lounastutka_app -f
@@ -65,32 +74,17 @@ docker service logs lounastutka_traefik -f
 
 For longer-term monitoring, use Grafana and Loki rather than raw service logs.
 
-### 5. Access the Services
+### Access the services
 
-- Application via Traefik: `http://localhost`
+- Application via Traefik: `https://<your-domain>`
 - Traefik dashboard: `https://dashboard.swarm.localhost/`
-- Grafana: `http://localhost:3000` or `http://127.0.0.1:3000`
+- Grafana: `http://<server-ip>:3000`
 - Prometheus: internal-only by default
 - Loki: internal-only by default
 
-If Grafana hangs on `http://localhost:3000`, your host likely resolves `localhost` to `::1` first and the Swarm ingress path may stall on IPv6. Use `http://127.0.0.1:3000` instead (or force IPv4 in your browser).
-
 Default Grafana credentials are `admin` / `admin` unless changed.
 
-### 6. Update the Stack
-
-After changing `compose.yaml`, the backend image, the frontend image, or Docker config files, rebuild the affected images and redeploy:
-
-```bash
-docker build -t lounastutka-backend:latest ./Backend
-docker build -t lounastutka-frontend:latest ./Frontend
-```
-
-```bash
-docker stack deploy -c compose.yaml lounastutka
-```
-
-### 7. Remove the Stack
+### Remove the stack
 
 ```bash
 docker stack rm lounastutka
@@ -102,9 +96,21 @@ To leave Swarm mode entirely:
 docker swarm leave --force
 ```
 
+---
+
 ## Local Development
 
-Use the development setup when you want a faster local loop without Swarm:
+Use the development setup for a fast local loop. No images need to be built — it uses the official `oven/bun:1` image directly and mounts your source code into the container.
+
+### Prerequisites
+
+Create a `.env` file in the repository root:
+
+```bash
+echo "POSTGRES_PASSWORD=yourpassword" > .env
+```
+
+### Start
 
 ```bash
 docker compose -f compose.dev.yaml up
@@ -112,27 +118,27 @@ docker compose -f compose.dev.yaml up
 
 This starts:
 
-- `backend` on `http://localhost:3001`
-- `frontend` on `http://localhost:5173`
+- `backend` on `http://localhost:3001` — runs `bun --watch`, live reloads on file save
+- `frontend` on `http://localhost:5173` — Vite dev server with HMR
 - `db` on `localhost:5432`
 
-The backend and frontend source directories are bind-mounted into the containers, so local file changes are reflected directly. Both containers run Bun commands in development mode.
-
-To stop the local environment:
+### Stop
 
 ```bash
 docker compose -f compose.dev.yaml down
 ```
 
-To also remove local dev volumes:
+To also remove local dev volumes (resets the database):
 
 ```bash
 docker compose -f compose.dev.yaml down -v
 ```
 
+---
+
 ## Production Notes
 
-1. **Image distribution**: In a real multi-node Swarm, locally built images are not automatically available on other nodes. Push images to a registry and update the `image:` references in `compose.yaml`.
-2. **Secrets**: Do not keep production credentials directly in `compose.yaml`. Use Docker Secrets or another secret manager.
-3. **Stateful services**: Volumes such as Postgres and Grafana storage are node-local unless backed by shared storage. Keep placement constraints in mind for multi-node deployments.
-4. **HTTPS**: Traefik is now the edge router. For a real deployment, add TLS certificates or a Let's Encrypt resolver before exposing the stack publicly.
+1. **Images**: Built by GitHub Actions and stored in `ghcr.io`. Each build is tagged with both `:latest` and the git commit SHA for rollbacks.
+2. **Secrets**: `POSTGRES_PASSWORD` is injected at deploy time via the environment. Do not commit credentials to the repository.
+3. **Stateful services**: Postgres and Grafana volumes are node-local. Keep placement constraints pinned to the manager node for single-node deployments.
+4. **HTTPS**: TLS certificates are loaded from `./certs` via `dynamic/tls.yaml`. Place your certificates there before deploying. Traefik handles HTTP→HTTPS redirects automatically.
