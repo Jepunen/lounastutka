@@ -53,6 +53,9 @@ chown github:github /opt/lounastutka
 
 # Initialize Docker Swarm
 docker swarm init
+mkdir -p /opt/lounastutka
+cd /opt/lounastutka
+git clone <repo-url> .
 ```
 
 The GitHub Actions deploy user is `github`. The `HETZNER_USER` secret should be set to `github`.
