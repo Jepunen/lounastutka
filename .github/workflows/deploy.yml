@@ -2,7 +2,7 @@ name: Build & Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [main, docker-swarm]
 
 env:
   REGISTRY: ghcr.io
@@ -53,25 +53,25 @@ jobs:
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend
 
-  deploy:
-    needs: build-and-push
-    runs-on: ubuntu-latest
+  # deploy:
+    #needs: build-and-push
+    #runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
+    #steps:
+      #- uses: actions/checkout@v4
 
-      - name: Deploy to Hetzner via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.HETZNER_HOST }}
-          username: ${{ secrets.HETZNER_USER }}
-          key: ${{ secrets.HETZNER_SSH_KEY }}
-          envs: GITHUB_REPOSITORY,REGISTRY
-          script: |
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            export IMAGE_TAG=${{ github.sha }}
-            export GITHUB_REPOSITORY=${{ github.repository }}
-            export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-            cd /opt/lounastutka
-            git pull
-            docker stack deploy -c compose.yaml lounastutka --with-registry-auth
+      #- name: Deploy to Hetzner via SSH
+        #uses: appleboy/ssh-action@v1
+        #with:
+          #host: ${{ secrets.HETZNER_HOST }}
+          #username: ${{ secrets.HETZNER_USER }}
+          #key: ${{ secrets.HETZNER_SSH_KEY }}
+          #envs: GITHUB_REPOSITORY,REGISTRY
+          #script: |
+            #echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            #export IMAGE_TAG=${{ github.sha }}
+            #export GITHUB_REPOSITORY=${{ github.repository }}
+            #export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            #cd /opt/lounastutka
+            #git pull
+            #docker stack deploy -c compose.yaml lounastutka --with-registry-auth
