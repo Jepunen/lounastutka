@@ -68,9 +68,10 @@ jobs:
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.HETZNER_HOST }}
-          username: ${{ secrets.HETZNER_USER }}
-          key: ${{ secrets.HETZNER_SSH_KEY }}
           port: 22
+          username: ${{ secrets.HETZNER_USER }}
+          protocol: tcp6
+          key: ${{ secrets.HETZNER_SSH_KEY }}
           envs: REGISTRY
           script: |
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
