@@ -30,14 +30,32 @@ Set these under **Settings → Secrets → Actions** in the GitHub repository:
 
 ### One-time server setup
 
-Run these once on the Hetzner server:
+Run these once on the Hetzner server (as `root`):
 
 ```bash
-docker swarm init
+# Install Docker
+apt update && apt install -y ca-certificates curl gnupg
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+chmod a+r /etc/apt/keyrings/docker.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+apt update && apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+systemctl enable --now docker
+
+# Create deploy user and give Docker access
+useradd -m -s /bin/bash github
+usermod -aG docker github
+# Copy your SSH public key to /home/github/.ssh/authorized_keys
+
+# Set up app directory
 mkdir -p /opt/lounastutka
-cd /opt/lounastutka
-git clone <repo-url> .
+chown github:github /opt/lounastutka
+
+# Initialize Docker Swarm
+docker swarm init
 ```
+
+The GitHub Actions deploy user is `github`. The `HETZNER_USER` secret should be set to `github`.
 
 ---
 
@@ -78,9 +96,11 @@ For longer-term monitoring, use Grafana and Loki rather than raw service logs.
 
 - Application via Traefik: `https://<your-domain>`
 - Traefik dashboard: `https://dashboard.swarm.localhost/`
-- Grafana: `http://<server-ip>:3000`
+- Grafana: `http://<server-ip>:3000` (port 3000 on the Hetzner server)
 - Prometheus: internal-only by default
 - Loki: internal-only by default
+
+> The server IP is stored in the `HETZNER_HOST` GitHub secret. Do not commit it to the repository.
 
 Default Grafana credentials are `admin` / `admin` unless changed.
 
