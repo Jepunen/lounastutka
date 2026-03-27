@@ -16,6 +16,7 @@ jobs:
 
     outputs:
       image_tag: ${{ github.sha }}
+      image_repo: ${{ steps.image_repo.outputs.repo }}
 
     steps:
       - uses: actions/checkout@v6
@@ -56,25 +57,25 @@ jobs:
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend
 
-  # deploy:
-    #needs: build-and-push
-    #runs-on: ubuntu-latest
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
 
-    #steps:
-      #- uses: actions/checkout@v6
+    steps:
+      - uses: actions/checkout@v6
 
-      #- name: Deploy to Hetzner via SSH
-        #uses: appleboy/ssh-action@v1
-        #with:
-          #host: ${{ secrets.HETZNER_HOST }}
-          #username: ${{ secrets.HETZNER_USER }}
-          #key: ${{ secrets.HETZNER_SSH_KEY }}
-          #envs: REGISTRY
-          #script: |
-            #echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            #export IMAGE_TAG=${{ github.sha }}
-            #export GITHUB_REPOSITORY=${{ steps.image_repo.outputs.repo }}
-            #export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-            #cd /opt/lounastutka
-            #git pull
-            #docker stack deploy -c compose.yaml lounastutka --with-registry-auth
+      - name: Deploy to Hetzner via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_USER }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          envs: REGISTRY
+          script: |
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            export IMAGE_TAG=${{ github.sha }}
+            export GITHUB_REPOSITORY=${{ needs.build-and-push.outputs.image_repo }}
+            export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            cd /opt/lounastutka
+            git pull
+            docker stack deploy -c compose.yaml lounastutka --with-registry-auth
