@@ -56,7 +56,7 @@ services:
       - --providers.docker.exposedbydefault=false
       
       # Specify the default network for Traefik to connect to services
-      - "--providers.swarm.network=traefik_traefik_proxy"
+      - "--providers.swarm.network=lounastutka_traefik_proxy"
 
       # API & Dashboard
       - "--api.dashboard=true" # Enable the dashboard
@@ -118,7 +118,7 @@ services:
     expose:
       - "3001"
     networks:
-      - edge
+      - traefik_proxy
       - backend
     deploy:
       replicas: 2
@@ -132,15 +132,16 @@ services:
         - traefik.enable=true
         # Define the API router rule
         - traefik.http.routers.api.rule=PathPrefix(`/api`)
-        # Expose the API on the HTTP entrypoint
-        - traefik.http.routers.api.entrypoints=web
+        # Expose the API on the HTTPS entrypoint
+        - traefik.http.routers.api.entrypoints=websecure
+        - traefik.http.routers.api.tls=true
         # Expose the API port number to Traefik
         - traefik.http.services.api.loadbalancer.server.port=3001
 
   frontend:
     image: ghcr.io/${GITHUB_REPOSITORY}/frontend:${IMAGE_TAG:-latest}
     networks:
-      - edge
+      - traefik_proxy
     deploy:
       replicas: 1
       labels:
@@ -148,8 +149,9 @@ services:
         - traefik.enable=true
         # Define the frontend router rule
         - traefik.http.routers.frontend.rule=PathPrefix(`/`)
-        # Expose the frontend on the HTTP entrypoint
-        - traefik.http.routers.frontend.entrypoints=web
+        # Expose the frontend on the HTTPS entrypoint
+        - traefik.http.routers.frontend.entrypoints=websecure
+        - traefik.http.routers.frontend.tls=true
         # Expose the frontend port number to Traefik
         - traefik.http.services.frontend.loadbalancer.server.port=80
 
