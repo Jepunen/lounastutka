@@ -13,7 +13,3 @@ helm-charts
 .editorconfig
 .idea
 coverage*
-.react-router/
-build/
-package-lock.json
-.DS_Store

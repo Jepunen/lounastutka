@@ -1,37 +1,21 @@
-# use the official Bun image
 # see all versions at https://hub.docker.com/r/oven/bun/tags
-FROM oven/bun:1 AS base
+FROM oven/bun:1 AS build
 WORKDIR /usr/src/app
 
-# install dependencies into temp directory
-# this will cache them and speed up future builds
-FROM base AS install
-RUN mkdir -p /temp/dev
-COPY package.json bun.lock /temp/dev/
-RUN cd /temp/dev && bun install --frozen-lockfile
+# Cache dependency install layer separately from source
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 
-# install with --production (exclude devDependencies)
-RUN mkdir -p /temp/prod
-COPY package.json bun.lock /temp/prod/
-RUN cd /temp/prod && bun install --frozen-lockfile --production
-
-# copy node_modules from temp directory
-# then copy all (non-ignored) project files into the image
-FROM base AS prerelease
-COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
-# [optional] tests & build
-ENV NODE_ENV=production
-# RUN bun test
-# RUN bun run build
 
-# copy production dependencies and source code into final image
-FROM base AS release
-COPY --from=install /temp/prod/node_modules node_modules
-COPY --from=prerelease /usr/src/app/index.ts .
-COPY --from=prerelease /usr/src/app/package.json .
+# Compile to a self-contained binary — no Bun or node_modules needed at runtime
+RUN bun build --compile --minify index.ts --outfile server
 
-# run the app
-USER bun
-EXPOSE 3001/tcp
-ENTRYPOINT [ "bun", "run", "index.ts" ]
+# Minimal final image: just the binary
+FROM debian:bookworm-slim AS release
+WORKDIR /app
+
+COPY --from=build /usr/src/app/server ./server
+
+EXPOSE 3001
+ENTRYPOINT ["./server"]
