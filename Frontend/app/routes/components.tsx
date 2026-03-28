@@ -42,47 +42,6 @@ export default function ComponentsPage() {
                         <Button variant="outline">Outline</Button>
                     </div >
                 </DemoCard>
-
-                <DemoCard title="Status Badges">
-                    <div className="flex flex-wrap gap-2">
-                        <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
-                            Open
-                        </span>
-                        <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-800">
-                            In Progress
-                        </span>
-                        <span className="rounded-full bg-gray-200 px-3 py-1 text-sm font-medium text-gray-700">
-                            Closed
-                        </span>
-                    </div>
-                </DemoCard>
-
-                <DemoCard title="Input Fields">
-                    <form className="space-y-3">
-                        <input
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none"
-                            placeholder="Component name"
-                        />
-                        <textarea
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none"
-                            placeholder="Notes"
-                            rows={3}
-                        />
-                    </form>
-                </DemoCard>
-
-                <DemoCard title="List Item">
-                    <ul className="divide-y divide-gray-200 rounded-md border border-gray-200">
-                        <li className="flex items-center justify-between px-3 py-2">
-                            <span>Card component</span>
-                            <span className="text-sm text-gray-500">Ready</span>
-                        </li>
-                        <li className="flex items-center justify-between px-3 py-2">
-                            <span>Dropdown component</span>
-                            <span className="text-sm text-gray-500">Draft</span>
-                        </li>
-                    </ul>
-                </DemoCard>
             </div>
         </main>
     );
