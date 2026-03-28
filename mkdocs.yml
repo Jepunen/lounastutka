@@ -1,1 +1,14 @@
 site_name: Lounastutka Documentation
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Frontend: frontend/index.md
+  - Backend: backend/index.md
+
+watch:
+  - mkdocs.yml
+  - Backend/README.md
+  - Frontend/README.md
+  - docs/
+theme: readthedocs
