@@ -65,7 +65,7 @@ services:
       - "--api.insecure=false" # Explicitly disable insecure API mod
 
       # Observability
-      - "--log.level=INFO" # Set the Log Level e.g INFO, DEBUG
+      - "--log.level=DEBUG" # Set the Log Level e.g INFO, DEBUG
       - "--accesslog=true" # Enable Access Logs
       - "--metrics.prometheus=true"  # Enable Prometheus
 
