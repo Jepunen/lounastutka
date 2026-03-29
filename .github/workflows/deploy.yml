@@ -2,7 +2,7 @@ name: Build & Deploy
 
 on:
   push:
-    branches: [main, docker-swarm, letsencrypt]
+    branches: [main, docker-swarm, lets-encrypt]
 
 env:
   REGISTRY: ghcr.io
