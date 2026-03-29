@@ -96,6 +96,7 @@ services:
         - "traefik.http.routers.dashboard.entrypoints=websecure"
         - "traefik.http.routers.dashboard.service=api@internal"
         - "traefik.http.routers.dashboard.tls=true"
+        - "traefik.http.routers.dashboard.tls.certresolver=le"
 
         # Basic‑auth middleware
         - "traefik.http.middlewares.dashboard-auth.basicauth.users=admin:$$apr1$$zcBUgvAR$$482EWeJ0xk2wquAJdYDNG/"
