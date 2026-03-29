@@ -83,7 +83,7 @@ jobs:
             export IMAGE_TAG=${{ github.sha }}
             export GITHUB_REPOSITORY=${{ needs.build-and-push.outputs.image_repo }}
             export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-            export HETZNER_API_KEY=${{ secrets.HETZNER_API_KEY }}
+            export HETZNER_API_TOKEN=${{ secrets.HETZNER_API_TOKEN }}
             if [ -d /opt/lounastutka/.git ]; then
               cd /opt/lounastutka && git fetch && git checkout ${{ github.ref_name }} && git pull
             else
