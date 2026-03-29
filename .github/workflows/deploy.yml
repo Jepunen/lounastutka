@@ -70,24 +70,34 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Deploy to Hetzner via SSH
+      - name: Copy config files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          port: 22
+          username: ${{ secrets.HETZNER_USER }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          source: "compose.yaml,docker/"
+          target: /opt/lounastutka
+
+      - name: Deploy stack
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.HETZNER_HOST }}
           port: 22
           username: ${{ secrets.HETZNER_USER }}
           key: ${{ secrets.HETZNER_SSH_KEY }}
-          envs: REGISTRY
           script: |
+            mkdir -p /opt/lounastutka/letsencrypt
+            touch /opt/lounastutka/letsencrypt/acme.json
+            chmod 600 /opt/lounastutka/letsencrypt/acme.json
+
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            export IMAGE_TAG=${{ github.sha }}
-            export GITHUB_REPOSITORY=${{ needs.build-and-push.outputs.image_repo }}
-            export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-            export HETZNER_API_TOKEN=${{ secrets.HETZNER_API_TOKEN }}
-            if [ -d /opt/lounastutka/.git ]; then
-              cd /opt/lounastutka && git fetch && git checkout ${{ github.ref_name }} && git pull
-            else
-              git clone https://github.com/${{ github.repository }}.git /opt/lounastutka
-              cd /opt/lounastutka
-            fi
+
+            cd /opt/lounastutka
+            IMAGE_TAG=${{ github.sha }} \
+            GITHUB_REPOSITORY=${{ needs.build-and-push.outputs.image_repo }} \
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
+            HETZNER_API_TOKEN=${{ secrets.HETZNER_API_TOKEN }} \
+            GF_ADMIN_PASSWORD=${{ secrets.GF_ADMIN_PASSWORD }} \
             docker stack deploy -c compose.yaml lounastutka --with-registry-auth
