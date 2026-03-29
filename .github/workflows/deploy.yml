@@ -85,7 +85,7 @@ jobs:
             export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
             export HETZNER_API_KEY=${{ secrets.HETZNER_API_KEY }}
             if [ -d /opt/lounastutka/.git ]; then
-              cd /opt/lounastutka && git pull
+              cd /opt/lounastutka && git fetch && git checkout ${{ github.ref_name }} && git pull
             else
               git clone https://github.com/${{ github.repository }}.git /opt/lounastutka
               cd /opt/lounastutka
