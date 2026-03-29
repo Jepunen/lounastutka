@@ -2,7 +2,7 @@ name: Build & Deploy
 
 on:
   push:
-    branches: [main, docker-swarm]
+    branches: [main, docker-swarm, letsencrypt]
 
 env:
   REGISTRY: ghcr.io
@@ -83,6 +83,7 @@ jobs:
             export IMAGE_TAG=${{ github.sha }}
             export GITHUB_REPOSITORY=${{ needs.build-and-push.outputs.image_repo }}
             export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            export HETZNER_API_KEY=${{ secrets.HETZNER_API_KEY }}
             if [ -d /opt/lounastutka/.git ]; then
               cd /opt/lounastutka && git pull
             else
