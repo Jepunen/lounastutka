@@ -1,7 +1,7 @@
 // WARNING: Development stuff, production is a bit different
 const rpName = "Lounastutka";
 const rpID = "localhost";
-const origin = `http://${rpID}`;
+const origin = `https://${rpID}`;
 
 import type {
 	AuthenticatorTransportFuture,
@@ -27,9 +27,9 @@ import {
 	verifyAuthenticationResponse,
 } from "@simplewebauthn/server";
 
-import db from "../database/helpers";
-// mock db
-// import db from "../testdb/testdb"
+// import db from "../database/helpers";
+// WARNING: In memory mock db
+import db from "../testdb/helpers"
 
 // src: https://simplewebauthn.dev/docs/packages/server#1-generate-registration-options
 export async function createRegistrationOptions(email: string) {

@@ -10,6 +10,7 @@ import jwt from "jsonwebtoken";
 export async function beginRegistration(req: Request, res: Response) {
 	const { email } = req.body;
 	const options = await AuthService.createRegistrationOptions(email);
+	if (!options || !options.challenge) throw new Error("Invalid registration opts");
 	res.json(options);
 }
 
@@ -24,6 +25,7 @@ export async function finishRegistration(req: Request, res: Response) {
 export async function beginAuthentication(req: Request, res: Response) {
 	const { email } = req.body;
 	const options = await AuthService.createAuthenticationOptions(email);
+	if (!options || !options.challenge) throw new Error("Invalid authentication opts");
 	res.json(options);
 }
 
@@ -41,7 +43,7 @@ export async function finishAuthentication(req: Request, res: Response) {
 			{ payload: email, },
 			jwtSec,
 			{ expiresIn: expires });
-		res.json({ ...result, token });
+		return res.json({ ...result, token });
 	}
 	res.json(result);
 }
