@@ -45,23 +45,23 @@ export default function ComponentsPage() {
                         <Button variant="outline">Outline</Button>
                     </div >
                 </DemoCard>
-				<DemoCard title="Map Pins">
-					<div className="flex items-center justify-center gap-3">
-						<MapPin type="restaurant" size={100}/>
-						<MapPin type="pizza" size={75}/>
-						<MapPin type="vegan"/>
-					</div>
-				</DemoCard>
-				<DemoCard title="Favourite Button">
-					<div className="flex items-center justify-center gap-3">
-						<FavouriteButton/>
-					</div >
-				</DemoCard>
-				<DemoCard title="Rating Text">
-					<div className="flex items-center justify-center gap-3">
-						<Rating stars={4.9} reviews={120}/>
-					</div >
-				</DemoCard>
+                <DemoCard title="Map Pins">
+                    <div className="flex items-center justify-center gap-3">
+                        <MapPin type="restaurant" size={100} />
+                        <MapPin type="pizza" size={75} />
+                        <MapPin type="vegan" />
+                    </div>
+                </DemoCard>
+                <DemoCard title="Favourite Button">
+                    <div className="flex items-center justify-center gap-3">
+                        <FavouriteButton />
+                    </div >
+                </DemoCard>
+                <DemoCard title="Rating Text">
+                    <div className="flex items-center justify-center gap-3">
+                        <Rating stars={4.9} reviews={120} />
+                    </div >
+                </DemoCard>
             </div>
         </main>
     );
