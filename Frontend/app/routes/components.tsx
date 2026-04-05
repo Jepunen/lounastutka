@@ -1,11 +1,14 @@
 
 import React from "react";
+import { useState } from "react";
 import Button from "../components/Button";
 import { MapPinVisual } from "../components/MapPin";
 import FavouriteButton from "~/components/FavouriteButton";
 import Rating from "~/components/Rating";
+import SearchBar from "~/components/SearchBar";
 
 import { useNavigate } from "react-router";
+import BottomNav from "~/components/BottomNav";
 
 function DemoCard({
     title,
@@ -31,6 +34,8 @@ export function meta() {
 
 export default function ComponentsPage() {
     const navigate = useNavigate();
+
+	const [searchValue, setSearchValue] = useState("");
     return (
         <main className="mx-auto min-h-screen max-w-5xl p-6 md:p-10">
             <header className="mb-8">
@@ -64,6 +69,16 @@ export default function ComponentsPage() {
                 <DemoCard title="Rating Text">
                     <div className="flex items-center justify-center gap-3">
                         <Rating stars={4.9} reviews={120} />
+                    </div >
+                </DemoCard>
+                <DemoCard title="Searchbar">
+                    <div className="flex items-center justify-center gap-3">
+                        <SearchBar value={searchValue} onChange={setSearchValue} />
+                    </div >
+                </DemoCard>
+                <DemoCard title="Bottom Navigation">
+                    <div className="flex items-center justify-center gap-3">
+                        <BottomNav />
                     </div >
                 </DemoCard>
             </div>
