@@ -1,9 +1,11 @@
 
 import React from "react";
 import Button from "../components/Button";
-import MapPin from "../components/MapPin";
+import { MapPinVisual } from "../components/MapPin";
 import FavouriteButton from "~/components/FavouriteButton";
 import Rating from "~/components/Rating";
+
+import { useNavigate } from "react-router";
 
 function DemoCard({
     title,
@@ -28,6 +30,7 @@ export function meta() {
 }
 
 export default function ComponentsPage() {
+    const navigate = useNavigate();
     return (
         <main className="mx-auto min-h-screen max-w-5xl p-6 md:p-10">
             <header className="mb-8">
@@ -35,6 +38,7 @@ export default function ComponentsPage() {
                 <p className="mt-2 text-gray-600">
                     Use this page to test simple frontend components and layouts.
                 </p>
+                <Button className="mt-2" variant="outline" onClick={() => navigate("/")}>Back to Map</Button>
             </header>
 
             <div className="grid gap-5 md:grid-cols-2">
@@ -47,9 +51,9 @@ export default function ComponentsPage() {
                 </DemoCard>
                 <DemoCard title="Map Pins">
                     <div className="flex items-center justify-center gap-3">
-                        <MapPin type="restaurant" size={100} />
-                        <MapPin type="pizza" size={75} />
-                        <MapPin type="vegan" />
+                        <MapPinVisual type="restaurant" size={100} />
+                        <MapPinVisual type="pizza" size={75} />
+                        <MapPinVisual type="vegan" />
                     </div>
                 </DemoCard>
                 <DemoCard title="Favourite Button">
@@ -63,6 +67,6 @@ export default function ComponentsPage() {
                     </div >
                 </DemoCard>
             </div>
-        </main>
+        </main >
     );
 }
