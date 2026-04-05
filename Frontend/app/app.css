@@ -23,3 +23,8 @@ html,
 body {
   @apply bg-neutral text-dark;
 }
+
+.leaflet-container {
+  width: 100%;
+  height: 100vh;
+}
