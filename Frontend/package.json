@@ -14,8 +14,8 @@
     "framer-motion": "^12.38.0",
     "isbot": "^5.1.36",
     "leaflet": "^1.9.4",
-    "react": "^19.0.0-rc.1",
-    "react-dom": "^19.0.0-rc.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "react-icons": "^5.6.0",
     "react-leaflet": "^5.0.0-rc.2",
     "react-router": "7.12.0"
