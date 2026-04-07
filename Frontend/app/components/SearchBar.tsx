@@ -16,8 +16,11 @@ const SearchBar = ({ value, onChange, placeholder = "Haku...", className = "" }:
       <input
         type="text"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value.slice(0, 100))}
         placeholder={placeholder}
+        maxLength={100}
+        autoComplete="off"
+        spellCheck={false}
         className="flex-1 bg-transparent text-neutral placeholder:text-foreground/40 font-medium text-base outline-none"
       />
     </div>

@@ -20,7 +20,7 @@ const places: Place[] = [
     { id: 3, type: "vegan",      position: [61.0558,  28.1892 ], name: "Green Bowl", category: "Kasvisruoka", stars: 4.7, reviews: 54 },
 ];
 
-function SetViewOnClick({ animateRef }: { animateRef: React.MutableRefObject<boolean> }) {
+function SetViewOnClick({ animateRef }: { animateRef: React.RefObject<boolean> }) {
     const map = useMapEvent("click", (e) => {
         map.setView(e.latlng, map.getZoom(), { animate: animateRef.current || false });
     });
