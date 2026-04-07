@@ -1,14 +1,4 @@
-// WARNING: Development stuff, production is a bit different
-const rpName = "Lounastutka";
-const rpID = "localhost";
-const origin = `https://${rpID}`;
-
-import type {
-	AuthenticatorTransportFuture,
-	CredentialDeviceType,
-	Base64URLString,
-} from '@simplewebauthn/server';
-import type { UserModel, PasskeyModel } from "../database/models";
+import type { PasskeyModel } from "../database/models";
 
 // NOTE: Documentation used to make these services:
 // src: https://simplewebauthn.dev/docs/packages/server
@@ -27,14 +17,74 @@ import {
 	verifyAuthenticationResponse,
 } from "@simplewebauthn/server";
 
-// import db from "../database/helpers";
-// WARNING: In memory mock db
-import db from "../testdb/helpers"
+import db from "../database/helpers";
+
+// NOTE: Provides a bit better error logs, mostly for debugging
+export class AuthServiceError extends Error {
+	statusCode: number;
+
+	constructor(message: string, statusCode = 400) {
+		super(message);
+		this.name = "AuthServiceError";
+		this.statusCode = statusCode;
+	}
+}
+
+// NOTE: backup authentication method in case passkeys do not work
+export async function registerPassword(email: string, password: string) {
+	const normalizedEmail = email.trim().toLowerCase();
+	const user = await db.getUserByEmail(normalizedEmail);
+
+	if (!user) {
+		const passwordHash = await Bun.password.hash(password);
+		return db.createUserWithPassword(normalizedEmail, passwordHash);
+	}
+
+	const existingPasskeys = await db.getPasskeys(user.id);
+	if (existingPasskeys.length > 0 || user.passwordHash) {
+		throw new AuthServiceError("Account already exists. Use login instead.", 409);
+	}
+
+	const passwordHash = await Bun.password.hash(password);
+	await db.updateUserPassword(user.id, passwordHash);
+	// Update the reference
+	return db.getUserByEmail(user.email);
+}
+
+export async function loginPassword(email: string, password: string) {
+	const normalizedEmail = email.trim().toLowerCase();
+	const user = await db.getUserByEmail(normalizedEmail);
+	if (!user?.passwordHash) {
+		throw new AuthServiceError("Invalid email or password.", 401);
+	}
+
+	const verified = await Bun.password.verify(password, user.passwordHash);
+	if (!verified) {
+		throw new AuthServiceError("Invalid email or password.", 401);
+	}
+
+	return user;
+}
+
+export async function getUserByEmail(email: string) {
+	const normalizedEmail = email.trim().toLowerCase();
+	return db.getUserByEmail(normalizedEmail);
+}
 
 // src: https://simplewebauthn.dev/docs/packages/server#1-generate-registration-options
-export async function createRegistrationOptions(email: string) {
-	let user = await db.getUserByEmail(email);
-	if (!user) user = await db.createUser(email);
+export async function createRegistrationOptions(email: string, rpID: string, rpName: string) {
+	// 
+	const normalizedEmail = email.trim().toLowerCase();
+	let user = await db.getUserByEmail(normalizedEmail);
+	if (!user) {
+		user = await db.createUser(normalizedEmail);
+	}
+	const user_pks: PasskeyModel[] = await db.getPasskeys(user.id);
+
+	// At this point, support only one passkey, for future multiple should be included
+	if (user_pks.length > 0) {
+		throw new AuthServiceError("Account already exists. Use login instead.", 409);
+	}
 
 	// Generates the options that can register the user through mobile passkeys
 	// Also makes the challenge that the user needs to solve
@@ -44,6 +94,17 @@ export async function createRegistrationOptions(email: string) {
 		userID: new Uint8Array(user.id),
 		userName: user.email,
 		attestationType: "none",
+		timeout: 60000,
+		excludeCredentials: user_pks.map((pk: PasskeyModel) => ({
+			id: pk.id,
+			type: "public-key",
+			transports: pk.transports,
+		})),
+		authenticatorSelection: {
+			residentKey: "required",
+			userVerification: "preferred",
+		},
+		supportedAlgorithmIDs: [-7, -257],
 	});
 
 	// 								  Dunno, LSP said so
@@ -52,18 +113,34 @@ export async function createRegistrationOptions(email: string) {
 	return options;
 }
 
-export async function verifyRegistration(email: string, attestationResponse: any) {
-	const user: UserModel = await db.getUserByEmail(email);
+
+export async function verifyRegistration(
+	email: string,
+	attestationResponse: any,
+	expectedOrigin: string,
+	expectedRPID: string) {
+
+	const normalizedEmail = email.trim().toLowerCase();
+	const user = await db.getUserByEmail(normalizedEmail);
+
 	if (!user) return null;
 
+	const existingPasskeys = await db.getPasskeys(user.id);
+
+	if (existingPasskeys.length > 0) {
+		throw new AuthServiceError("Account already exists. Use login instead.", 409);
+	}
+
+	// Current challenge for the req user, could be a express-session object instead of row in db
 	const expectedChallenge = await db.getChallenge(user.id);
 
 	// Check if the user solved challenge correctly
 	const verification = await verifyRegistrationResponse({
 		response: attestationResponse,
 		expectedChallenge,
-		expectedOrigin: origin,
-		expectedRPID: rpID,
+		expectedOrigin,
+		expectedRPID,
+		requireUserVerification: true,
 	});
 
 	const { verified, registrationInfo } = verification;
@@ -79,7 +156,6 @@ export async function verifyRegistration(email: string, attestationResponse: any
 			credentialId: credential.id,
 			publicKey: credential.publicKey,
 			counter: credential.counter,
-			// webauthnUserID: credential.userHandle,
 			deviceType: credentialDeviceType,
 			backedUp: credentialBackedUp,
 			transports: credential.transports,
@@ -89,18 +165,24 @@ export async function verifyRegistration(email: string, attestationResponse: any
 	return verification;
 }
 
-export async function createAuthenticationOptions(email: string) {
-	const user = await db.getUserByEmail(email);
+export async function createAuthenticationOptions(email: string, rpID: string) {
+	const normalizedEmail = email.trim().toLowerCase();
+
+	const user = await db.getUserByEmail(normalizedEmail);
+
 	if (!user) return null;
-	const passkeys = await db.getPasskeys(user.id);
+
+	// const passkeys = await db.getPasskeys(user.id);
 
 	const options = generateAuthenticationOptions({
 		rpID,
 		userVerification: "preferred",
-		allowCredentials: passkeys.map((pk) => ({
-			id: pk.id,
-			transports: pk.transports,
-		})),
+		// Allows discoverable credentials (passwordless mode)
+		allowCredentials: [],
+		// allowCredentials: passkeys.map((pk) => ({
+		// 	id: pk.id,
+		// 	transports: pk.transports,
+		// })),
 	});
 
 	const challenge = (await options).challenge;
@@ -110,11 +192,20 @@ export async function createAuthenticationOptions(email: string) {
 	return options;
 }
 
-export async function verifyAuthentication(email: string, assertionResponse: any) {
-	const user = await db.getUserByEmail(email);
-	if (!user) return null;
+
+export async function verifyAuthentication(
+	email: string,
+	assertionResponse: any,
+	expectedOrigin: string,
+	expectedRPID: string,
+) {
+	const normalizedEmail = email.trim().toLowerCase();
+
+	const user = await db.getUserByEmail(normalizedEmail);
+	if (!user) return { verified: false, error: "Unknown user" };
 
 	const expectedChallenge = await db.getChallenge(user.id);
+	if (!expectedChallenge) return { verified: false, error: "Unknown challenge" };
 
 	// NOTE: Probably should use only one or allow only one or properly support multiplpe
 	const passkeys = await db.getPasskeys(user.id);
@@ -125,14 +216,15 @@ export async function verifyAuthentication(email: string, assertionResponse: any
 	const verification = await verifyAuthenticationResponse({
 		response: assertionResponse,
 		expectedChallenge,
-		expectedOrigin: origin,
-		expectedRPID: rpID,
+		expectedOrigin,
+		expectedRPID,
 		credential: {
 			id: validCred.id,
 			publicKey: new Uint8Array(validCred.publicKey),
 			counter: validCred.counter,
 			transports: validCred.transports,
 		},
+		requireUserVerification: true,
 	});
 
 	if (verification.verified) {
