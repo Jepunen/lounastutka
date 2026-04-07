@@ -1,15 +1,30 @@
 @import "tailwindcss";
 
+@font-face {
+	font-family: "Kreon";
+	src: url("/fonts/Kreon/Kreon-VariableFont_wght.ttf") format("ttf");
+	font-weight: 300 700;
+	font-display: swap;
+}
+
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
+  --color-primary: #9c3f00;
+  --color-secondary: #2d6a4f;
+  --color-tertiary: #ffc300;
+  --color-neutral: #f8f9fa;
+  --color-dark: #1b1b1b;
+  --color-gray: #E0E3E4;
+
+  --font-sans: "Kreon", ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 html,
 body {
-  @apply bg-white dark:bg-gray-950;
+  @apply bg-neutral text-dark;
+}
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
-  }
+.leaflet-container {
+  width: 100%;
+  height: 100vh;
 }
