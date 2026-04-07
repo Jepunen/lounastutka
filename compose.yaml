@@ -6,6 +6,7 @@ services:
 
     networks:
       - traefik_proxy
+      - monitoring
 
     ports:
         # Expose Traefik's entry points to the Swarm
@@ -68,6 +69,8 @@ services:
       - "--log.level=DEBUG" # Set the Log Level e.g INFO, DEBUG
       - "--accesslog=true" # Enable Access Logs
       - "--metrics.prometheus=true"  # Enable Prometheus
+      - "--metrics.prometheus.entrypoint=metrics"  # Serve metrics on dedicated entrypoint
+      - "--entrypoints.metrics.address=:8082"  # Internal metrics entrypoint (not exposed externally)
 
       # Certificates
       - "--certificatesresolvers.le.acme.email=tuukkanen.daniel@gmail.com"
@@ -203,12 +206,23 @@ services:
      - '--web.console.templates=/usr/share/prometheus/consoles'
    networks:
      - monitoring
-     - backend # Needed to scrape the app
+     - backend
+     - traefik_proxy
    deploy:
      replicas: 1
      placement:
        constraints:
          - node.role == manager
+     labels:
+       - "traefik.enable=true"
+       - "traefik.docker.network=lounastutka_traefik_proxy"
+       - "traefik.http.routers.prometheus.rule=Host(`prometheus.swarm.lounastutka.fi`)"
+       - "traefik.http.routers.prometheus.entrypoints=websecure"
+       - "traefik.http.routers.prometheus.tls=true"
+       - "traefik.http.routers.prometheus.tls.certresolver=le"
+       - "traefik.http.routers.prometheus.middlewares=prometheus-auth@swarm"
+       - "traefik.http.middlewares.prometheus-auth.basicauth.users=admin:$$apr1$$zcBUgvAR$$482EWeJ0xk2wquAJdYDNG/"
+       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
 
   # ---------------------------------------------
   # Logging: Loki
