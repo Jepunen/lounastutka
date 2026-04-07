@@ -215,10 +215,8 @@ services:
   # ---------------------------------------------
   loki:
     image: grafana/loki:latest
-    ports:
-      - target: 3100
-        published: 3100
-        protocol: tcp
+    expose:
+      - "3100"
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - monitoring
@@ -233,16 +231,15 @@ services:
   # ---------------------------------------------
   grafana:
     image: grafana/grafana:latest
-    ports:
-      - target: 3000
-        published: 3000
-        protocol: tcp
+    expose:
+      - "3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GF_ADMIN_PASSWORD}
     volumes:
       - grafana_data:/var/lib/grafana
     networks:
       - monitoring
+      - traefik_proxy
     depends_on:
       - prometheus
       - loki
@@ -251,6 +248,17 @@ services:
       placement:
         constraints:
           - node.role == manager
+      labels:
+        # Enable Service discovery for Traefik
+        - "traefik.enable=true"
+        # Define the Grafana router rule
+        - "traefik.http.routers.grafana.rule=Host(`grafana.lounastutka.fi`)"
+        # Expose the Grafana on the HTTPS entrypoint
+        - "traefik.http.routers.grafana.entrypoints=websecure"
+        - "traefik.http.routers.grafana.tls=true"
+        - "traefik.http.routers.grafana.tls.certresolver=le"
+        # Expose the Grafana port number to Traefik
+        - "traefik.http.services.grafana.loadbalancer.server.port=3000"
 
 # ---------------------------------------------
 # Named Volumes
