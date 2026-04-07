@@ -102,7 +102,7 @@ services:
         - "traefik.http.routers.dashboard.tls.certresolver=le"
 
         # Basic‑auth middleware
-        - "traefik.http.middlewares.dashboard-auth.basicauth.users=admin:$$apr1$$zcBUgvAR$$482EWeJ0xk2wquAJdYDNG/"
+        - "traefik.http.middlewares.dashboard-auth.basicauth.users=admin:$$apr1$$ZYOVgZD7$$5F4WYw/8oXaFXSA1TVYuI/"
         - "traefik.http.routers.dashboard.middlewares=dashboard-auth@swarm"
 
         # Service hint
