@@ -3,6 +3,9 @@ import express from "express";
 import type { Request, NextFunction, Response, Express } from "express";
 import cors from "cors";
 
+// NOTE: Custom error handler
+import errorHandler from "./utils/error.ts";
+
 // NOTE: Add routes from "routes/" here:
 import authorizationRoutes from "./routes/auth.routes";
 import protectedRoutes from "./routes/protected.routes.ts";
@@ -24,6 +27,9 @@ app.use(cors());
 app.use("/auth", authorizationRoutes);
 app.use("/api/auth", authorizationRoutes);
 app.use("/api/protected", protectedRoutes);
+
+// NOTE: Should be included to "use" as last
+app.use(errorHandler);
 
 const port = process.env.PORT || 3001;
 
