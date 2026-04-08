@@ -1,6 +1,7 @@
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
 import * as AuthService from "../services/auth.service";
 import jwt from "jsonwebtoken";
+import { AppError } from "../utils/error.ts";
 
 // Create the token for authenticated users
 function signToken(userId: number, email: string) {
@@ -16,24 +17,22 @@ function signToken(userId: number, email: string) {
 // NOTE: We can return the options to the frontend for @simplewebauthn/browser start/verify methods
 
 // src: https://simplewebauthn.dev/docs/packages/server#1-generate-registration-options
-export async function beginRegistration(req: Request, res: Response) {
+export async function beginRegistration(req: Request, res: Response, next: NextFunction) {
 	try {
 		const { email } = req.body;
 		const rpID = process.env.WEBAUTHN_RP_ID ?? req.hostname;
 		const rpName = process.env.WEBAUTHN_RP_NAME ?? "Lounastutka";
 
 		const options = await AuthService.createRegistrationOptions(email, rpID, rpName);
-		if (!options || !options.challenge) throw new Error("Invalid registration opts");
+		if (!options || !options.challenge) throw new AppError("Invalid registration opts", 400);
 		res.json(options);
 	} catch (error: unknown) {
-		console.error("beginRegistration error:", error);
-		const statusCode = (error as any).statusCode || 500;
-		return res.status(statusCode).json({ error: (error as Error).message || "Something went wrong with the request" });
+		next(error);
 	}
 }
 
 // src: https://simplewebauthn.dev/docs/packages/server#2-verify-registration-response
-export async function finishRegistration(req: Request, res: Response) {
+export async function finishRegistration(req: Request, res: Response, next: NextFunction) {
 	try {
 		const { email, attestationResponse } = req.body;
 		const expectedOrigin = process.env.WEBAUTHN_ORIGIN ?? `${req.protocol}//${req.get("host")}`;
@@ -43,22 +42,25 @@ export async function finishRegistration(req: Request, res: Response) {
 			email, attestationResponse, expectedOrigin, expectedRPID);
 		res.json(result);
 	} catch (error: unknown) {
-		return res.status(500).json({ error: "Something went wrong with registration" });
+		next(error);
 	}
 }
 
-export async function registerPassword(req: Request, res: Response) {
+export async function registerPassword(req: Request, res: Response, next: NextFunction) {
 	try {
 		const { email, password } = req.body as { email?: string; password?: string };
 		if (!email || !password) {
-			return res.status(400).json({ error: "Email and password are required." });
+			throw new AppError("Email and password are required.", 400);
 		}
+
+		// TODO: Move password requirements to frontend, could keep this as backup for now without frontend
 		if (password.length < 8) {
-			return res.status(400).json({ error: "Password must be at least 8 characters." });
+			throw new AppError("Password must be at least 8 characters.", 400);
 		}
 
 		const user = await AuthService.registerPassword(email, password);
-		if (!user) return res.status(401).json({ error: "User could not be created" });
+		if (!user) throw new AppError("User could not be created.", 401);
+
 		const token = signToken(user.id, user.email);
 		return res.status(201).json({
 			authenticated: true,
@@ -68,15 +70,15 @@ export async function registerPassword(req: Request, res: Response) {
 			},
 		});
 	} catch (error: unknown) {
-		return res.status(500).json({ error: "Something went wrong with registration" });
+		next(error);
 	}
 }
 
-export async function loginPassword(req: Request, res: Response) {
+export async function loginPassword(req: Request, res: Response, next: NextFunction) {
 	try {
 		const { email, password } = req.body as { email?: string; password?: string };
 		if (!email || !password) {
-			return res.status(400).json({ error: "Email and password are required." });
+			throw new AppError("Email and password are required.", 400);
 		}
 
 		const user = await AuthService.loginPassword(email, password);
@@ -89,26 +91,27 @@ export async function loginPassword(req: Request, res: Response) {
 			},
 		});
 	} catch (error: unknown) {
-		return res.status(500).json({ error: "Something went wrong with registration" });
+		next(error);
 	}
 }
+
 // src: https://simplewebauthn.dev/docs/packages/server#1-generate-authentication-options
-export async function beginAuthentication(req: Request, res: Response) {
+export async function beginAuthentication(req: Request, res: Response, next: NextFunction) {
 	try {
 		const { email } = req.body;
 		const rpID = process.env.WEBAUTHN_RP_ID ?? req.hostname;
 		const options = await AuthService.createAuthenticationOptions(email, rpID);
 		if (!options || !options.challenge) {
-			return res.status(404).json({ error: "Invalid authentication opts" });
+			throw new AppError("Invalid authentication options", 400);
 		}
 		res.json(options);
 	} catch (error: unknown) {
-		return res.status(500).json({ error: "Something went wrong with authentication" });
+		next(error);
 	}
 }
 
 // src: https://simplewebauthn.dev/docs/packages/server#2-verify-authentication-response
-export async function finishAuthentication(req: Request, res: Response) {
+export async function finishAuthentication(req: Request, res: Response, next: NextFunction) {
 	try {
 		const { email, assertionResponse } = req.body;
 		const expectedOrigin = process.env.WEBAUTHN_ORIGIN ?? `${req.protocol}//${req.get("host")}`;
@@ -122,16 +125,14 @@ export async function finishAuthentication(req: Request, res: Response) {
 			// Verify that the user can be found from db
 			const user = await AuthService.getUserByEmail(email);
 			if (!user) {
-				return res.status(401).json({
-					error: "Unable to authenticate user"
-				});
+				throw new AppError("Unable to authenticate user.", 401);
 			}
 			const token = signToken(user.id, user.email);
 			return res.json({ ...result, token });
 		}
 		res.json(result);
 	} catch (error: unknown) {
-		return res.status(500).json({ error: "Something went wrong with authentication" });
+		next(error);
 	}
 }
 

@@ -17,18 +17,10 @@ import {
 	verifyAuthenticationResponse,
 } from "@simplewebauthn/server";
 
+// Global error class
+import { AppError } from "../utils/error.ts";
+
 import db from "../database/helpers";
-
-// NOTE: Provides a bit better error logs, mostly for debugging
-export class AuthServiceError extends Error {
-	statusCode: number;
-
-	constructor(message: string, statusCode = 400) {
-		super(message);
-		this.name = "AuthServiceError";
-		this.statusCode = statusCode;
-	}
-}
 
 // NOTE: backup authentication method in case passkeys do not work
 export async function registerPassword(email: string, password: string) {
@@ -42,7 +34,7 @@ export async function registerPassword(email: string, password: string) {
 
 	const existingPasskeys = await db.getPasskeys(user.id);
 	if (existingPasskeys.length > 0 || user.passwordHash) {
-		throw new AuthServiceError("Account already exists. Use login instead.", 409);
+		throw new AppError("Account already exists. Use login instead.", 409);
 	}
 
 	const passwordHash = await Bun.password.hash(password);
@@ -55,12 +47,12 @@ export async function loginPassword(email: string, password: string) {
 	const normalizedEmail = email.trim().toLowerCase();
 	const user = await db.getUserByEmail(normalizedEmail);
 	if (!user?.passwordHash) {
-		throw new AuthServiceError("Invalid email or password.", 401);
+		throw new AppError("Invalid email or password.", 401);
 	}
 
 	const verified = await Bun.password.verify(password, user.passwordHash);
 	if (!verified) {
-		throw new AuthServiceError("Invalid email or password.", 401);
+		throw new AppError("Invalid email or password.", 401);
 	}
 
 	return user;
@@ -83,7 +75,7 @@ export async function createRegistrationOptions(email: string, rpID: string, rpN
 
 	// At this point, support only one passkey, for future multiple should be included
 	if (user_pks.length > 0) {
-		throw new AuthServiceError("Account already exists. Use login instead.", 409);
+		throw new AppError("Account already exists. Use login instead.", 409);
 	}
 
 	// Generates the options that can register the user through mobile passkeys
@@ -128,7 +120,7 @@ export async function verifyRegistration(
 	const existingPasskeys = await db.getPasskeys(user.id);
 
 	if (existingPasskeys.length > 0) {
-		throw new AuthServiceError("Account already exists. Use login instead.", 409);
+		throw new AppError("Account already exists. Use login instead.", 409);
 	}
 
 	// Current challenge for the req user, could be a express-session object instead of row in db
