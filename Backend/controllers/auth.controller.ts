@@ -26,7 +26,9 @@ export async function beginRegistration(req: Request, res: Response) {
 		if (!options || !options.challenge) throw new Error("Invalid registration opts");
 		res.json(options);
 	} catch (error: unknown) {
-		return res.status(500).json({ error: "Something went wrong with the request" });
+		console.error("beginRegistration error:", error);
+		const statusCode = (error as any).statusCode || 500;
+		return res.status(statusCode).json({ error: (error as Error).message || "Something went wrong with the request" });
 	}
 }
 
