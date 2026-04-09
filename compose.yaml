@@ -190,6 +190,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-lounastutka}
     volumes:
       - pg_data:/var/lib/postgresql/data
+      - ./Database/init:/docker-entrypoint-initdb.d:ro
     networks:
       - backend
     deploy:
