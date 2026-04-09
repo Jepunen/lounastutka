@@ -125,6 +125,7 @@ export async function verifyRegistration(
 
 	// Current challenge for the req user, could be a express-session object instead of row in db
 	const expectedChallenge = await db.getChallenge(user.id);
+	if (!expectedOrigin) throw new AppError("Challenge was invalid", 400);
 
 	// Check if the user solved challenge correctly
 	const verification = await verifyRegistrationResponse({
