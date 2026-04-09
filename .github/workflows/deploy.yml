@@ -102,6 +102,11 @@ jobs:
             IMAGE_TAG=${{ github.sha }} \
             GITHUB_REPOSITORY=${{ needs.build-and-push.outputs.image_repo }} \
             POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
+            POSTGRES_URL=${{ secrets.POSTGRES_URL }} \
+            JWT_SECRET=${{ secrets.JWT_SECRET }} \
+            WEBAUTHN_RP_ID=${{ secrets.WEBAUTHN_RP_ID }} \
+            WEBAUTHN_RP_NAME=${{ secrets.WEBAUTHN_RP_NAME }} \
+            WEBAUTHN_ORIGIN=${{ secrets.WEBAUTHN_ORIGIN }} \
             HETZNER_API_TOKEN=${{ secrets.HETZNER_API_TOKEN }} \
             GF_ADMIN_PASSWORD=${{ secrets.GF_ADMIN_PASSWORD }} \
             docker stack deploy -c compose.yaml lounastutka --with-registry-auth
