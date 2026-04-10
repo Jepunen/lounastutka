@@ -252,16 +252,16 @@ services:
   # Logging: Promtail
   # ---------------------------------------------
   promtail:
-  image: grafana/promtail:latest
-  volumes:
-    - /var/run/docker.sock:/var/run/docker.sock:ro
-    - /var/lib/docker/containers:/var/lib/docker/containers:ro
-    - ./docker/promtail/config.yaml:/etc/promtail/config.yaml:ro
-  command: -config.file=/etc/promtail/config.yaml
-  networks:
-    - monitoring
-  deploy:
-    mode: global  # run on every Swarm node
+    image: grafana/promtail:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./docker/promtail/config.yaml:/etc/promtail/config.yaml:ro
+    command: -config.file=/etc/promtail/config.yaml
+    networks:
+      - monitoring
+    deploy:
+      mode: global  # run on every Swarm node
 
   # ---------------------------------------------
   # Visualization: Grafana
