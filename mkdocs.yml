@@ -6,10 +6,18 @@ nav:
   - Frontend: frontend/index.md
   - Backend: backend/index.md
   - Database: database/index.md
+  - Architecture: architecture/index.md
 
 watch:
   - mkdocs.yml
   - Backend/README.md
   - Frontend/README.md
   - docs/
+
 theme: readthedocs
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - pymdownx.blocks.caption
+
