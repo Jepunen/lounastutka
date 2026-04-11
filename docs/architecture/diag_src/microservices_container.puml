@@ -1,0 +1,32 @@
+@startuml MicroserviceContainers
+!ENABLE_ALL_PLANT_ELEMENTS = 1
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+' src: https://github.com/plantuml-stdlib/C4-PlantUML
+' C4 video: https://www.youtube.com/watch?v=x2-rSnhpw0g
+
+' Boundary(alias, label, ?type, ?tags, ?link, ?descr) {
+' Container(alias, label, ?techn, ?descr, ?sprite, ?tags, ?link, ?baseShape)
+' ContainerDb(alias, label, ?techn, ?descr, ?sprite, ?tags, ?link, ?baseShape)
+' ContainerQueue(alias, label, ?techn, ?descr, ?sprite, ?tags, ?link, ?baseShape)
+
+'Person(user, "Target User", $sprite="person")
+Person(baseUser, "Basic User", $descr="User that wants to find a selection of restaurant menus quickly.")
+Person(restUser, "Restaurant User", $descr="User that wants to show their restaurant information on the website.")
+
+System_Boundary(lt, "Lounastutka Web Application") {
+	Container(fe, "SPA Frontend", "React", "Provides the user a mapview with different restaurants and their menus.")
+	Container(be, "Application Backend", "Bun.js, Express", "Handles requests and data flow between different services.")
+	ContainerDb(db, "Application Content Database", "PostgreSQL", "Stores restaurant, user and authentication related information.")
+	Container(ms, "Menu Data Microservice", "Python", "Fetches and parses menu information from restaurant websites, serving them to the backend.")
+}
+
+' Rel(personAlias, containerAlias, "Label", "Optional Technology")
+Rel(baseUser, fe, "navigates to", "HTTPS/JSON")
+Rel(restUser, fe, "navigates to", "HTTPS/JSON")
+Rel(fe, be, "makes API calls to", "HTTPS/JSON")
+Rel(be, db, "makes queries to")
+Rel(be, ms, "makes calls to")
+
+SHOW_LEGEND()
+
+@enduml
