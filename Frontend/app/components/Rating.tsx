@@ -1,5 +1,5 @@
 import { IoStarSharp } from "react-icons/io5";
-import { Link } from "react-router";
+import { Link } from "@tanstack/react-router";
 
 const Rating = ({ stars, reviews }: {stars: number, reviews: number}) => {
 	return (

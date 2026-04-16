@@ -1,11 +1,11 @@
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate, useLocation } from "@tanstack/react-router";
 import { IoLocationSharp, IoListSharp, IoSettingsOutline } from "react-icons/io5";
 
 const tabs = [
   { label: "Kartta", icon: IoLocationSharp, path: "/" },
   { label: "Komponentit", icon: IoListSharp, path: "/components" },
   { label: "Asetukset", icon: IoSettingsOutline, path: "/settings" },
-];
+] as const;
 
 const BottomNav = () => {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ const BottomNav = () => {
         return (
           <button
             key={path}
-            onClick={() => navigate(path)}
+            onClick={() => navigate({ to: path })}
             className="flex flex-col items-center gap-1 flex-1 cursor-pointer"
           >
             <span
