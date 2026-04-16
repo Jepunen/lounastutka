@@ -4,6 +4,7 @@ This repository has two Docker entry points:
 
 - `compose.yaml` — Docker Swarm production deployment (deployed automatically via GitHub Actions)
 - `compose.dev.yaml` — local development with `docker compose up`
+- `compose.local.swarm.yaml` — local single-node Docker Swarm deployment with locally built images
 
 ## CI/CD — GitHub Actions (normal deployment flow)
 
@@ -152,6 +153,62 @@ To also remove local dev volumes (resets the database):
 
 ```bash
 docker compose -f compose.dev.yaml down -v
+```
+
+---
+
+## Local Swarm Deployment
+
+Use this when you want to exercise the Swarm/Traefik deployment shape locally without pushing images to GHCR or configuring production TLS.
+
+### Build local images
+
+```bash
+docker build -t lounastutka-backend:local ./Backend
+docker build -t lounastutka-frontend:local ./Frontend
+```
+
+### Initialize Swarm
+
+```bash
+docker swarm init
+```
+
+If Swarm is already enabled, Docker will tell you and you can skip this step.
+
+### Deploy the local stack
+
+```bash
+docker stack deploy -c compose.local.swarm.yaml lounastutka
+```
+
+### Local endpoints
+
+- Frontend: `http://localhost`
+- API: `http://localhost/api`
+- Traefik dashboard: `http://dashboard.localhost`
+- Whoami: `http://whoami.localhost`
+- Grafana: `http://grafana.localhost`
+- Prometheus: `http://prometheus.localhost`
+
+Inside Grafana, use the internal service URLs rather than Traefik hostnames:
+
+- Prometheus datasource: `http://prometheus:9090`
+- Loki datasource: `http://loki:3100`
+
+### Inspect the stack
+
+```bash
+docker stack services lounastutka
+docker service ps lounastutka_traefik
+docker service ps lounastutka_app
+docker service ps lounastutka_frontend
+```
+
+### Tear it down
+
+```bash
+docker stack rm lounastutka
 ```
 
 ---
