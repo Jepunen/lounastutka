@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, useMap, useMapEvent } from "react-leaflet";
 import { IoChevronBackSharp, IoChevronForwardSharp } from "react-icons/io5";
 import MapPinMarker from "~/components/MapPin";
 import RestaurantCard from "~/components/RestaurantCard";
 import SearchBar from "~/components/SearchBar";
-import RestaurantCardMoreInfo from "~/components/RestaurantCardMoreInfo";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -59,10 +59,17 @@ function Home() {
   const [visiblePlaces, setVisiblePlaces] = useState<Place[]>([]);
   const [searchValue, setSearchValue] = useState("");
 
+  const orderedVisiblePlaces = restaurantSelected
+    ? [
+      restaurantSelected,
+      ...visiblePlaces.filter((p) => p.id !== restaurantSelected.id),
+    ]
+    : visiblePlaces;
+
   return (
     <div className="relative h-screen w-full">
       {/* Search bar — overlays the map at the top */}
-      <div className="fixed top-4 z-[1000] inset-x-0 flex justify-center px-4 pointer-events-none">
+      <div className="fixed top-4 z-1000 inset-x-0 flex justify-center px-4 pointer-events-none">
         <div className="pointer-events-auto">
           <SearchBar value={searchValue} onChange={setSearchValue} />
         </div>
@@ -83,8 +90,8 @@ function Home() {
             size={40}
             popup={p.name}
             setRestaurantEvent={() => {
-              setRestaurantSelected(p);
               setSidebarOpen(true);
+              setRestaurantSelected(p);
             }}
           />
         ))}
@@ -102,26 +109,30 @@ function Home() {
         </button>
 
         {sidebarOpen && (
-          <div className="overflow-y-auto flex flex-col gap-3 pb-24 px-3 pt-2">
-
-            {restaurantSelected ? (
-              <RestaurantCardMoreInfo
-                restaurant={restaurantSelected}
-
-
-              />
-            ) : (
-              visiblePlaces.map((p) => (
+          <motion.div layout className="overflow-y-auto flex flex-col gap-3 pb-24 px-3 pt-2">
+            {orderedVisiblePlaces.map((p) => (
+              <motion.div
+                key={p.id}
+                layout
+                initial={false}
+                transition={{ type: "spring", stiffness: 420, damping: 34, mass: 0.75 }}
+              >
                 <RestaurantCard
-                  key={p.id}
                   name={p.name}
                   category={p.category}
                   stars={p.stars}
                   reviews={p.reviews}
+                  address={p.address}
+                  description={p.description}
+                  isExpanded={restaurantSelected?.id === p.id}
+                  onToggleMoreInfo={() => {
+                    setRestaurantSelected((current) => (current?.id === p.id ? null : p));
+                  }}
                 />
-              ))
-            )}
-          </div>
+              </motion.div>
+            ))
+            }
+          </motion.div>
         )}
       </div>
     </div>
