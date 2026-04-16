@@ -191,6 +191,11 @@ docker stack deploy -c compose.local.swarm.yaml lounastutka
 - Grafana: `http://grafana.localhost`
 - Prometheus: `http://prometheus.localhost`
 
+Inside Grafana, use the internal service URLs rather than Traefik hostnames:
+
+- Prometheus datasource: `http://prometheus:9090`
+- Loki datasource: `http://loki:3100`
+
 ### Inspect the stack
 
 ```bash

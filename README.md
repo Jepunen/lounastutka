@@ -103,6 +103,8 @@ Local endpoints:
 - Grafana: http://grafana.localhost
 - Prometheus: http://prometheus.localhost
 
+Inside Grafana, use `http://prometheus:9090` for Prometheus and `http://loki:3100` for Loki.
+
 ## Documentation
 
 Project docs are built with MkDocs.
