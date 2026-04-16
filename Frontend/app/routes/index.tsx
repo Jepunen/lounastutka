@@ -5,6 +5,7 @@ import { IoChevronBackSharp, IoChevronForwardSharp } from "react-icons/io5";
 import MapPinMarker from "~/components/MapPin";
 import RestaurantCard from "~/components/RestaurantCard";
 import SearchBar from "~/components/SearchBar";
+import RestaurantCardMoreInfo from "~/components/RestaurantCardMoreInfo";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -18,16 +19,19 @@ type Place = {
   category: string;
   stars: number;
   reviews: number;
+  address?: string;
+  description?: string;
 };
 
 const places: Place[] = [
-  { id: 1, type: "restaurant", position: [61.05692, 28.19061], name: "Bistro", category: "Ravintola", stars: 4.9, reviews: 120 },
-  { id: 2, type: "pizza",      position: [61.0574,  28.192  ], name: "Pizza Spot", category: "Pizza ja kebab", stars: 4.5, reviews: 98 },
-  { id: 3, type: "vegan",      position: [61.0558,  28.1892 ], name: "Green Bowl", category: "Kasvisruoka", stars: 4.7, reviews: 54 },
+  { id: 1, type: "restaurant", position: [61.05692, 28.19061], name: "Bistro", category: "Ravintola", stars: 4.9, reviews: 120, address: "Villimiehenkatu 1, 53100 Lappeenranta", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In ex erat, pellentesque nec tellus nec, tempor convallis turpis. Donec sit amet dui porta, ornare dolor vitae, convallis massa. Aliquam sed iaculis purus. Sed consectetur dapibus nulla sit amet mollis. Morbi pellentesque molestie ligula in pharetra. Duis fringilla tristique tortor et dapibus. Aliquam erat volutpat." },
+  { id: 2, type: "pizza", position: [61.0574, 28.192], name: "Pizza Spot", category: "Pizza ja kebab", stars: 4.5, reviews: 98, address: "Kauppakatu 10, 53100 Lappeenranta", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In ex erat, pellentesque nec tellus nec, tempor convallis turpis. Donec sit amet dui porta, ornare dolor vitae, convallis massa. Aliquam sed iaculis purus. Sed consectetur dapibus nulla sit amet mollis. Morbi pellentesque molestie ligula in pharetra. Duis fringilla tristique tortor et dapibus. Aliquam erat volutpat." },
+  { id: 3, type: "vegan", position: [61.0558, 28.1892], name: "Green Bowl", category: "Kasvisruoka", stars: 4.7, reviews: 54, address: "Rauhankatu 5, 53100 Lappeenranta", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In ex erat, pellentesque nec tellus nec, tempor convallis turpis. Donec sit amet dui porta, ornare dolor vitae, convallis massa. Aliquam sed iaculis purus. Sed consectetur dapibus nulla sit amet mollis. Morbi pellentesque molestie ligula in pharetra. Duis fringilla tristique tortor et dapibus. Aliquam erat volutpat." },
 ];
 
-function SetViewOnClick({ animateRef }: { animateRef: React.RefObject<boolean> }) {
+function SetViewOnClick({ animateRef, onMapClick }: { animateRef: React.RefObject<boolean>, onMapClick?: () => void }) {
   const map = useMapEvent("click", (e) => {
+    onMapClick?.();
     map.setView(e.latlng, map.getZoom(), { animate: animateRef.current || false });
   });
   return null;
@@ -51,6 +55,7 @@ function MapBoundsTracker({ onBoundsChange }: { onBoundsChange: (visible: Place[
 function Home() {
   const animateRef = useRef(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [restaurantSelected, setRestaurantSelected] = useState<Place | null>(null);
   const [visiblePlaces, setVisiblePlaces] = useState<Place[]>([]);
   const [searchValue, setSearchValue] = useState("");
 
@@ -68,7 +73,7 @@ function Home() {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <SetViewOnClick animateRef={animateRef} />
+        <SetViewOnClick animateRef={animateRef} onMapClick={() => setRestaurantSelected(null)} />
         <MapBoundsTracker onBoundsChange={setVisiblePlaces} />
         {places.map((p) => (
           <MapPinMarker
@@ -77,14 +82,17 @@ function Home() {
             type={p.type}
             size={40}
             popup={p.name}
+            setRestaurantEvent={() => {
+              setRestaurantSelected(p);
+              setSidebarOpen(true);
+            }}
           />
         ))}
       </MapContainer>
 
       <div
-        className={`absolute z-1000 top-0 right-0 h-full hidden md:flex flex-col transition-all duration-300 bg-linear-to-r from-transparent from-0% via-neutral/70 via-30% to-neutral to-60% ${
-          sidebarOpen ? "w-80" : "w-10"
-        }`}
+        className={`absolute z-1000 top-0 right-0 h-full hidden md:flex flex-col transition-all duration-300 bg-linear-to-r from-transparent from-0% via-neutral/70 via-30% to-neutral to-60% ${sidebarOpen ? "w-100" : "w-10"
+          }`}
       >
         <button
           onClick={() => setSidebarOpen((o) => !o)}
@@ -95,15 +103,24 @@ function Home() {
 
         {sidebarOpen && (
           <div className="overflow-y-auto flex flex-col gap-3 pb-24 px-3 pt-2">
-            {visiblePlaces.map((p) => (
-              <RestaurantCard
-                key={p.id}
-                name={p.name}
-                category={p.category}
-                stars={p.stars}
-                reviews={p.reviews}
+
+            {restaurantSelected ? (
+              <RestaurantCardMoreInfo
+                restaurant={restaurantSelected}
+
+
               />
-            ))}
+            ) : (
+              visiblePlaces.map((p) => (
+                <RestaurantCard
+                  key={p.id}
+                  name={p.name}
+                  category={p.category}
+                  stars={p.stars}
+                  reviews={p.reviews}
+                />
+              ))
+            )}
           </div>
         )}
       </div>
