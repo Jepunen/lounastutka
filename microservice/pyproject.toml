@@ -1,0 +1,12 @@
+[project]
+name = "scraper"
+version = "0.1.0"
+dependencies = [
+    "requests",
+    "beautifulsoup4",
+    "lxml",
+    "fastapi",
+    "uvicorn"
+]
+
+[tool.uv]
