@@ -9,6 +9,7 @@ Lounastutka is a containerized full-stack application.
 The repository supports two ways to run the app:
 
 - Local development with Docker Compose
+- Local Docker Swarm deployment
 - Production-style deployment with Docker Swarm and Traefik
 
 ## Quick Start
@@ -71,6 +72,36 @@ Main Swarm endpoints:
 - App via Traefik: http://localhost
 - Traefik dashboard: http://localhost:8080
 - Grafana: http://localhost:3000
+
+## Local Swarm Deployment
+
+Build local images:
+
+```bash
+docker build -t lounastutka-backend:local ./Backend
+docker build -t lounastutka-frontend:local ./Frontend
+```
+
+Initialize Swarm if needed:
+
+```bash
+docker swarm init
+```
+
+Deploy the local stack:
+
+```bash
+docker stack deploy -c compose.local.swarm.yaml lounastutka
+```
+
+Local endpoints:
+
+- Frontend: http://localhost
+- API: http://localhost/api
+- Traefik dashboard: http://dashboard.localhost
+- Whoami: http://whoami.localhost
+- Grafana: http://grafana.localhost
+- Prometheus: http://prometheus.localhost
 
 ## Documentation
 
