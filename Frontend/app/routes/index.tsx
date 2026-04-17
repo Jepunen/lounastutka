@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, useMap, useMapEvent } from "react-leaflet";
 import { IoChevronBackSharp, IoChevronForwardSharp } from "react-icons/io5";
+import MobileRestaurantSheet from "~/components/MobileRestaurantSheet";
 import MapPinMarker from "~/components/MapPin";
 import RestaurantCard from "~/components/RestaurantCard";
 import SearchBar from "~/components/SearchBar";
@@ -140,9 +141,9 @@ function Home() {
     : visiblePlaces;
 
   return (
-    <div className="relative h-screen w-full">
+    <div className="relative min-h-dvh w-full overflow-hidden">
       {/* Search bar — overlays the map at the top */}
-      <div className="fixed top-4 z-1000 inset-x-0 flex justify-center px-4 pointer-events-none">
+      <div className="fixed top-4 z-[1100] inset-x-0 flex justify-center px-4 pointer-events-none">
         <div className="pointer-events-auto">
           <SearchBar value={searchValue} onChange={setSearchValue} />
         </div>
@@ -169,6 +170,11 @@ function Home() {
           />
         ))}
       </MapContainer>
+
+      <MobileRestaurantSheet
+        restaurant={restaurantSelected}
+        onClose={() => setRestaurantSelected(null)}
+      />
 
       <div
         className={`absolute z-1000 top-0 right-0 h-full hidden md:flex flex-col transition-all duration-300 bg-linear-to-r from-transparent from-0% via-neutral/70 via-30% to-neutral to-60% ${sidebarOpen ? "w-100" : "w-10"
