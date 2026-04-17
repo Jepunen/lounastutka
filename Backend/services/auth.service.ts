@@ -58,6 +58,7 @@ export async function loginPassword(email: string, password: string) {
 	return user;
 }
 
+// Used for the authentication for controller, its not best but should suffice for error logging.
 export async function getUserByEmail(email: string) {
 	const normalizedEmail = email.trim().toLowerCase();
 	return db.getUserByEmail(normalizedEmail);
@@ -65,12 +66,13 @@ export async function getUserByEmail(email: string) {
 
 // src: https://simplewebauthn.dev/docs/packages/server#1-generate-registration-options
 export async function createRegistrationOptions(email: string, rpID: string, rpName: string) {
-	// 
 	const normalizedEmail = email.trim().toLowerCase();
 	let user = await db.getUserByEmail(normalizedEmail);
+	
 	if (!user) {
 		user = await db.createUser(normalizedEmail);
 	}
+
 	const user_pks: PasskeyModel[] = await db.getPasskeys(user.id);
 
 	// At this point, support only one passkey, for future multiple should be included
@@ -80,10 +82,9 @@ export async function createRegistrationOptions(email: string, rpID: string, rpN
 
 	// Generates the options that can register the user through mobile passkeys
 	// Also makes the challenge that the user needs to solve
-	const options = generateRegistrationOptions({
+	const options = await generateRegistrationOptions({
 		rpName,
 		rpID,
-		userID: new Uint8Array(user.id),
 		userName: user.email,
 		attestationType: "none",
 		timeout: 60000,
@@ -93,14 +94,14 @@ export async function createRegistrationOptions(email: string, rpID: string, rpN
 			transports: pk.transports,
 		})),
 		authenticatorSelection: {
-			residentKey: "required",
+			residentKey: "discouraged",
 			userVerification: "preferred",
 		},
 		supportedAlgorithmIDs: [-7, -257],
 	});
 
 	// 								  Dunno, LSP said so
-	await db.storeChallenge(user.id, (await options).challenge);
+	await db.storeChallenge(user.id, (options).challenge);
 
 	return options;
 }
@@ -125,7 +126,7 @@ export async function verifyRegistration(
 
 	// Current challenge for the req user, could be a express-session object instead of row in db
 	const expectedChallenge = await db.getChallenge(user.id);
-	if (!expectedOrigin) throw new AppError("Challenge was invalid", 400);
+	if (!expectedChallenge) throw new AppError("Challenge was invalid", 400);
 
 	// Check if the user solved challenge correctly
 	const verification = await verifyRegistrationResponse({
@@ -153,6 +154,10 @@ export async function verifyRegistration(
 			backedUp: credentialBackedUp,
 			transports: credential.transports,
 		});
+		// NOTE: unlike authentication (login) we do not want to update counter in registration.
+
+		// Remove the challenge once we can determine that the user successfully completed it.
+		await db.removeChallenge(user.id, expectedChallenge);
 	}
 
 	return verification;
@@ -165,21 +170,19 @@ export async function createAuthenticationOptions(email: string, rpID: string) {
 
 	if (!user) return null;
 
-	// const passkeys = await db.getPasskeys(user.id);
+	const passkeys = await db.getPasskeys(user.id);
 
-	const options = generateAuthenticationOptions({
+	const options = await generateAuthenticationOptions({
 		rpID,
 		userVerification: "preferred",
-		// Allows discoverable credentials (passwordless mode)
-		allowCredentials: [],
-		// allowCredentials: passkeys.map((pk) => ({
-		// 	id: pk.id,
-		// 	transports: pk.transports,
-		// })),
+		allowCredentials: passkeys.map((pk) => ({
+			id: pk.id,
+			type: "public-key",
+			transports: pk.transports,
+		})),
 	});
 
-	const challenge = (await options).challenge;
-	// NOTE: Ideally we would store the full options as json object
+	const challenge = (options).challenge;
 	await db.storeChallenge(user.id, challenge);
 
 	return options;
@@ -221,7 +224,10 @@ export async function verifyAuthentication(
 	});
 
 	if (verification.verified) {
+		// For authentication (login) we should update the counter
 		await db.updateCounter(validCred.id, verification.authenticationInfo.newCounter);
+		// Also remove the current used challenge
+		await db.removeChallenge(user.id, expectedChallenge);
 	}
 
 	return verification;
