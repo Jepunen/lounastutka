@@ -13,42 +13,47 @@ import FavouriteButton from "~/components/FavouriteButton";
 import Rating from "~/components/Rating";
 
 export interface RestaurantCardProps {
-  name: string;
-  category: string;
-  stars: number;
-  reviews: number;
-  address?: string;
-  description?: string;
-  todayHours?: string;
-  lunchTime?: string;
-  priceLevel?: string;
-  phone?: string;
-  website?: string;
-  tags?: string[];
-  todayMenu?: string[];
+  restaurant: {
+    name: string;
+    category: string;
+    stars: number;
+    reviews: number;
+    address?: string;
+    description?: string;
+    todayHours?: string;
+    lunchTime?: string;
+    priceLevel?: string;
+    phone?: string;
+    website?: string;
+    tags?: string[];
+    todayMenu?: string[];
+  };
   isExpanded?: boolean;
   onToggleMoreInfo?: () => void;
   onViewMenu?: () => void;
 }
 
 const RestaurantCard = ({
-  name,
-  category,
-  stars,
-  reviews,
-  address,
-  description,
-  todayHours,
-  lunchTime,
-  priceLevel,
-  phone,
-  website,
-  tags = [],
-  todayMenu = [],
+  restaurant,
   isExpanded = false,
   onToggleMoreInfo,
   onViewMenu,
 }: RestaurantCardProps) => {
+  const {
+    name,
+    category,
+    stars,
+    reviews,
+    address,
+    description,
+    todayHours,
+    lunchTime,
+    priceLevel,
+    phone,
+    website,
+    tags = [],
+    todayMenu = [],
+  } = restaurant;
 
   return (
     <motion.div

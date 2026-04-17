@@ -86,19 +86,7 @@ function Home() {
                 transition={{ type: "spring", stiffness: 420, damping: 34, mass: 0.75 }}
               >
                 <RestaurantCard
-                  name={p.name}
-                  category={p.category}
-                  stars={p.stars}
-                  reviews={p.reviews}
-                  address={p.address}
-                  description={p.description}
-                  todayHours={p.todayHours}
-                  lunchTime={p.lunchTime}
-                  priceLevel={p.priceLevel}
-                  phone={p.phone}
-                  website={p.website}
-                  tags={p.tags}
-                  todayMenu={p.todayMenu}
+                  restaurant={p}
                   isExpanded={restaurantSelected?.id === p.id}
                   onToggleMoreInfo={() => {
                     setRestaurantSelected((current) => (current?.id === p.id ? null : p));
