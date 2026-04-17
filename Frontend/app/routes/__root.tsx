@@ -11,7 +11,7 @@ function RootComponent() {
       <Outlet />
 
       {/* Bottom navigation */}
-      <div className="fixed bottom-4 z-1000 inset-x-0 flex justify-center px-4">
+      <div data-bottom-nav className="fixed bottom-4 z-1000 inset-x-0 flex justify-center px-4">
         <BottomNav />
       </div>
     </>
