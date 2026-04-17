@@ -8,6 +8,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@simplewebauthn/browser": "^13.3.0",
     "@tanstack/react-router": "^1",
     "framer-motion": "^12.38.0",
     "leaflet": "^1.9.4",
