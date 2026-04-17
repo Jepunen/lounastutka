@@ -35,11 +35,20 @@ export async function beginRegistration(req: Request, res: Response, next: NextF
 export async function finishRegistration(req: Request, res: Response, next: NextFunction) {
 	try {
 		const { email, attestationResponse } = req.body;
-		const expectedOrigin = process.env.WEBAUTHN_ORIGIN ?? `${req.protocol}//${req.get("host")}`;
+		const expectedOrigin = process.env.WEBAUTHN_ORIGIN ?? `${req.protocol}://${req.get("host")}`;
 		const expectedRPID = process.env.WEBAUTHN_RP_ID ?? req.hostname;
 
 		const result = await AuthService.verifyRegistration(
 			email, attestationResponse, expectedOrigin, expectedRPID);
+		if (result?.verified) {
+			const user = await AuthService.getUserByEmail(email);
+			if (!user) {
+				throw new AppError("Unable to register user.", 401);
+			}
+			const token = signToken(user.id, user.email);
+
+			return res.json({ ...result, token });
+		}
 		res.json(result);
 	} catch (error: unknown) {
 		next(error);
@@ -114,12 +123,11 @@ export async function beginAuthentication(req: Request, res: Response, next: Nex
 export async function finishAuthentication(req: Request, res: Response, next: NextFunction) {
 	try {
 		const { email, assertionResponse } = req.body;
-		const expectedOrigin = process.env.WEBAUTHN_ORIGIN ?? `${req.protocol}//${req.get("host")}`;
+		const expectedOrigin = process.env.WEBAUTHN_ORIGIN ?? `${req.protocol}://${req.get("host")}`;
 		const expectedRPID = process.env.WEBAUTHN_RP_ID ?? req.hostname;
 
 		const result = await AuthService.verifyAuthentication(
 			email, assertionResponse, expectedOrigin, expectedRPID);
-
 		// Send the JWT token for user session
 		if (result?.verified) {
 			// Verify that the user can be found from db
@@ -128,6 +136,7 @@ export async function finishAuthentication(req: Request, res: Response, next: Ne
 				throw new AppError("Unable to authenticate user.", 401);
 			}
 			const token = signToken(user.id, user.email);
+
 			return res.json({ ...result, token });
 		}
 		res.json(result);
