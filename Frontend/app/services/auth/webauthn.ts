@@ -23,10 +23,10 @@ type AuthenticationResult = {
 // **Includes also the conditional which could be integrated.
 export async function registerWebauthnPasskey(email: string) {
 	// First, we need to get the registration options from the backend service:
-	const options = await postJSON<any>("/api/auth/create-registration-options", { email, });
+	const options = await postJSON<any>("/auth/create-registration-options", { email, });
 
 	// We can then pass them to the browsers simplewebauthn internal logic handler
-	const attestationResponse = startRegistration({ optionsJSON: options });
+	const attestationResponse = await startRegistration({ optionsJSON: options });
 
 	// After that is done, we can send the attestation result back to backend for verification:
 	return postJSON<RegistrationOptions>("/auth/finish-registration", { email, attestationResponse });
@@ -34,10 +34,10 @@ export async function registerWebauthnPasskey(email: string) {
 
 export async function loginWebauthnPasskey(email: string) {
 	// First, we need to get the authenticaiton options from the backend service, similar to registration:
-	const options = await postJSON<any>("/api/auth/create-authentication-options", { email, });
+	const options = await postJSON<any>("/auth/create-authentication-options", { email, });
 
 	// We can then pass them to the browsers simplewebauthn internal logic handler 
-	const assertionResponse = startAuthentication({ optionsJSON: options });
+	const assertionResponse = await startAuthentication({ optionsJSON: options });
 
 	// After that is done, we can send the attestation result back to backend for verification:
 	return postJSON<AuthenticationResult>("/auth/finish-authentication", { email, assertionResponse });

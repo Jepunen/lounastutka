@@ -11,10 +11,10 @@ type PasswordAuthResult = {
 
 // Nothing major going on here, a lot simpler than webauthn passkey but also less secure.
 export async function registerWithPassword(email: string, password: string) {
-	return postJSON<PasswordAuthResult>("/api/auth/register-password", { email, password });
+	return postJSON<PasswordAuthResult>("/auth/register-password", { email, password });
 }
 
 export async function loginWithPassword(email: string, password: string) {
-	return postJSON<PasswordAuthResult>("/api/auth/login-password", { email, password });
+	return postJSON<PasswordAuthResult>("/auth/login-password", { email, password });
 }
 

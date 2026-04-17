@@ -23,14 +23,14 @@ export function clearJWTToken() {
 
 // GET method helper
 export async function getJSON<T>(path: string): Promise<T> {
-	return requestJSON<T>(path, {
+	return requestJSON<T>(`/api${path}`, {
 		method: "GET",
 	});
 }
 
 // POST method helper
 export async function postJSON<T>(path: string, body: unknown): Promise<T> {
-	return requestJSON(path, {
+	return requestJSON(`/api${path}`, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
