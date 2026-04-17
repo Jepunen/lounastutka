@@ -58,16 +58,22 @@ export default function MapPinMarker({
 	type,
 	size = 50,
 	popup,
+	setRestaurantEvent,
 }: {
 	position: LatLngExpression;
 	type: MapPinType;
 	size?: number;
 	popup?: React.ReactNode;
+	setRestaurantEvent: () => void;
 }) {
 	const icon = useMemo(() => getMapPinIcon(type, size), [type, size]);
 
 	return (
-		<Marker position={position} icon={icon}>
+		<Marker
+			position={position}
+			icon={icon}
+			eventHandlers={{ click: () => setRestaurantEvent() }}
+		>
 			{popup ? <Popup>{popup}</Popup> : null}
 		</Marker>
 	);
