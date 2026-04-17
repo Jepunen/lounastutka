@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "../hooks/useAuth";
 
 const inputClass =
   "w-full border border-gray rounded-lg px-4 py-2.5 text-sm text-dark bg-white outline-none focus:border-dark/30 transition";
@@ -28,6 +29,32 @@ export default function AuthForm() {
 
   const registerEmailFilled = registerEmail.trim().length > 0;
   const headingSize = registerEmailFilled ? "text-2xl" : "text-4xl";
+
+  // Hook file usage
+  const {
+    loading,
+    error,
+    loginWithPW,
+    loginWithWebauth,
+    registerWithPW,
+    registerWithWebauth
+  } = useAuth();
+
+  // Helpers for the authentication 
+  async function handleLogin() {
+    try { await loginWithPW(loginEmail.trim(), loginPassword) } catch { }
+  }
+  async function handleLoginPasskey() {
+    try { await loginWithWebauth(loginEmail.trim()) } catch { }
+  }
+  async function handleRegisterPasskey() {
+    try { await registerWithWebauth(registerEmail.trim()) } catch { }
+  }
+
+  async function handleRegister() {
+    if (registerPassword !== registerConfirm) alert("Passwords do not match!");
+    try { await registerWithPW(registerEmail.trim(), registerPassword) } catch { }
+  }
 
   return (
     <div className="flex flex-col sm:flex-row w-full rounded-2xl overflow-hidden shadow-2xl">
@@ -80,9 +107,17 @@ export default function AuthForm() {
             {resetMode ? "← Back to login" : "Forgot your password?"}
           </button>
         </div>
+        <button
+          type="button"
+          onClick={handleLoginPasskey}
+          className="w-full bg-primary text-white font-bold py-3 rounded-4xl shadow-lg hover:brightness-110 active:scale-98 transition-all"
+        >
+          {resetMode ? "Send reset link" : "Login With Passkey"}
+        </button>
 
         <button
           type="button"
+          onClick={handleLogin}
           className="w-full bg-primary text-white font-bold py-3 rounded-4xl shadow-lg hover:brightness-110 active:scale-98 transition-all"
         >
           {resetMode ? "Send reset link" : "Login"}
@@ -134,9 +169,17 @@ export default function AuthForm() {
             )}
           </AnimatePresence>
         </div>
+        <button
+          type="button"
+          onClick={handleRegisterPasskey}
+          className="w-full bg-primary text-white font-bold py-3 rounded-4xl shadow-lg hover:brightness-110 active:scale-98 transition-all"
+        >
+          Sign Up With Passkey
+        </button>
 
         <button
           type="button"
+          onClick={handleRegister}
           className="w-full bg-primary text-white font-bold py-3 rounded-4xl shadow-lg hover:brightness-110 active:scale-98 transition-all"
         >
           Sign Up
@@ -145,3 +188,4 @@ export default function AuthForm() {
     </div>
   );
 }
+
