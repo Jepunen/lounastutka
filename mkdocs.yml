@@ -5,6 +5,7 @@ nav:
   - Installation: installation.md
   - Frontend: frontend/index.md
   - Backend: backend/index.md
+  - Database: database/index.md
 
 watch:
   - mkdocs.yml
