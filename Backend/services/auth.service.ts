@@ -25,6 +25,9 @@ import db from "../database/helpers";
 // NOTE: backup authentication method in case passkeys do not work
 export async function registerPassword(email: string, password: string) {
   const normalizedEmail = email.trim().toLowerCase();
+  if (!(normalizedEmail.length > 0)) {
+    throw new AppError("Email is too short, provide valid email.", 400);
+  }
   const user = await db.getUserByEmail(normalizedEmail);
 
   if (!user) {
