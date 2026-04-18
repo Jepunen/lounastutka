@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 
 const inputClass =
@@ -50,7 +50,6 @@ export default function AuthForm() {
   async function handleRegisterPasskey() {
     try { await registerWithWebauth(registerEmail.trim()) } catch { }
   }
-
   async function handleRegister() {
     if (registerPassword !== registerConfirm) alert("Passwords do not match!");
     try { await registerWithPW(registerEmail.trim(), registerPassword) } catch { }
@@ -98,6 +97,9 @@ export default function AuthForm() {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Show some service setError during auth.*/}
+          {error && (<p className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded">{error}</p>)}
 
           <button
             type="button"
