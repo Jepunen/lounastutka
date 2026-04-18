@@ -1,0 +1,49 @@
+@startuml DataFlow
+
+' src: https://www.lucidchart.com/pages/data-flow-diagram
+' 		notation "Yourdon and Coad"
+
+title Data Flow Diagram – Lounastutka (Level 1)
+
+' External Entities
+rectangle "Basic User" as user
+rectangle "Restaurant User" as restUser
+
+' Processes
+circle "Traefik Reverse Proxy" as traefik
+circle "Frontend SPA (React)" as spa
+circle "Backend API (Bun.js, Express)" as be
+circle "Menu Processing Microservice (Python)" as ms
+circle "Authentication (Email, Password, Passkey, JWT)" as auth
+
+' Data store
+database "PostgreSQL Database" as db
+
+' Data flows
+user --> traefik : HTTPS Request
+restUser --> traefik : HTTPS Request
+
+traefik --> spa : Serves SPA (HTML/CSS/JS)
+spa --> be : API Requests (HTTPS/JSON, JWT)
+be --> auth : Validate JWT
+auth --> be : Auth Result
+
+be --> db : Read/Write User Data\nRead/Write Restaurant Data
+db --> be : Query Results
+
+be --> ms : Menu Fetch Request
+ms --> be : Processed Menu Data
+
+' SPA receives data
+be --> spa : JSON Response (Menus, Restaurants, User Data)
+
+
+legend right
+    | Symbol | Meaning |
+    | rectangle | External Entity|
+    | circle | Process|
+    | database | Data Store|
+    |   ---->| Data Flow|
+endlegend
+
+@enduml

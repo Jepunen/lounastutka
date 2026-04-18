@@ -6,7 +6,12 @@ nav:
   - Frontend: frontend/index.md
   - Backend: backend/index.md
   - Database: database/index.md
-  - Architecture: architecture/index.md
+  - Architecture: 
+    - Description: architecture/index.md
+    - Microservice: architecture/microservice.md
+    - Deployment: architecture/deployment.md
+    - Data flow: architecture/dataflow.md
+    - Use-case: architecture/usecase.md
 
 watch:
   - mkdocs.yml

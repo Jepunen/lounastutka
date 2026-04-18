@@ -1,0 +1,71 @@
+@startuml Deployment
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+
+title Deployment Diagram – Lounastutka System
+
+' src: https://github.com/plantuml-stdlib/C4-PlantUML/blob/master/samples/C4CoreDiagrams.md
+' src: https://github.com/plantuml-stdlib/C4-PlantUML/blob/master/samples/C4_Deployment%20Diagram%20Sample%20-%20bigbankplc.puml
+
+' Deployment_Node(alias, label, ?type, ?descr, ?sprite, ?tags, ?link)
+' Container(alias, label, ?techn, ?descr, ?sprite, ?tags, ?link, ?baseShape)
+' ContainerDb(alias, label, ?techn, ?descr, ?sprite, ?tags, ?link, ?baseShape)
+
+' External User env
+Deployment_Node(userDevice, "Customer Device", "Mobile or Desktop") {
+    Deployment_Node(wb, "Web Browser", "Chrome, Firefox, Safari, Edge") {
+        Container(spa, "SPA Frontend", "React", "Runs in the user's browser and interacts with the backend API.")
+    }
+}
+
+Deployment_Node(ci, "GitHub Actions", "CI/CD Pipeline") {
+    Container(ciPipe, "Deployment Workflow", "GitHub Actions", "Builds the images, pushes to the registry & deploys to the Docker Swarm.")
+}
+
+Deployment_Node(hetzner, "Hetzner VPS", "4 vCPUs, 16GB RAM, 40GB SSD") {
+
+    Deployment_Node(swarm, "Docker Swarm", "Container Environment") {
+
+        Deployment_Node(traefikNode, "Traefik Reverse Proxy", "Docker Service") {
+            Container(traefik, "Traefik", "Traefik", "Handles HTTPS termination, routing, and load balancing.")
+        }
+        Deployment_Node(frontendNode, "SPA Frontend Service", "Docker Service") {
+            Container(frontend, "SPA Frontend", "React, Nginx", "Serves static frontend files to users.")
+        }
+        Deployment_Node(beNode, "Application Backend Service", "Docker Service") {
+            Container(be, "Backend API", "Bun.js, Express", "Handles business logic, authentication, and API requests.")
+        }
+        Deployment_Node(msNode, "Menu Data Microservice", "Docker Service") {
+            Container(ms, "Menu Processing Microservice", "Python", "Scrapes and processes restaurant menu data.")
+        }
+        Deployment_Node(dbNode, "Application Content Database Service", "Docker Service") {
+            ContainerDb(db, "PostgreSQL Database", "PostgreSQL", "Stores restaurant, user and authentication related information.")
+        }
+        Deployment_Node(monitoringNode, "Observator Stack", "Docker Services") {
+            Container(prom, "Prometheus", "Prometheus", "Scrapes metrics from services.")
+            Container(loki, "Loki", "Loki", "Collects logs from services.")
+            Container(graf, "Grafana", "Grafana", "Visualizes logs and metrics.")
+        }
+    }
+}
+
+' Rel(personAlias, containerAlias, "Label", "Optional Technology")
+Rel(userDevice, traefik, "sends HTTPS requests to")
+Rel(traefik, frontend, "routes traffic to")
+Rel(traefik, be, "routes API requests to")
+
+Rel(spa, be, "makes API calls", "HTTPS/JSON JWT")
+Rel(be, db, "reads/Writes data")
+Rel(be, ms, "requests menu processing")
+
+Rel(prom, be, "scrapes metrics")
+Rel(prom, ms, "scrapes metrics")
+Rel(loki, be, "collects logs")
+Rel(loki, ms, "collects logs")
+Rel(graf, prom, "queries metrics")
+Rel(graf, loki, "queries logs")
+
+Rel(ciPipe, swarm, "deploys updated services")
+
+SHOW_LEGEND()
+
+@enduml
