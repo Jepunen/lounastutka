@@ -55,6 +55,8 @@ async function requestJSON<T>(
 		...init,
 		headers,
 	});
+	// If the token is expired, clear from local.
+	if (response.status === 401) { clearJWTToken(); }
 	// Since we have theoretically the error msg in case of failure during fetch / api call,
 	//   we can and should check its existence and hopefully somewhere show it to user.
 	const data = (await response.json().catch(() => null)) as T | APIErrorPayload | null;
