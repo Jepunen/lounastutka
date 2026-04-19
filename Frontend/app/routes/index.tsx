@@ -1,63 +1,37 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { MapContainer, TileLayer, useMap, useMapEvent } from "react-leaflet";
+import { motion } from "framer-motion";
+import { useRef, useState } from "react";
+import { MapContainer, TileLayer } from "react-leaflet";
+import { MapBoundsTracker, MapSelectionFocus, SetViewOnClick } from "~/components/map/MapBehavior";
 import { IoChevronBackSharp, IoChevronForwardSharp } from "react-icons/io5";
+import MobileRestaurantSheet from "~/components/MobileRestaurantSheet";
 import MapPinMarker from "~/components/MapPin";
 import RestaurantCard from "~/components/RestaurantCard";
+import { places, type Place } from "~/data/places";
 import SearchBar from "~/components/SearchBar";
 
 export const Route = createFileRoute("/")({
   component: Home,
 });
 
-type Place = {
-  id: number;
-  type: "restaurant" | "pizza" | "vegan";
-  position: [number, number];
-  name: string;
-  category: string;
-  stars: number;
-  reviews: number;
-};
-
-const places: Place[] = [
-  { id: 1, type: "restaurant", position: [61.05692, 28.19061], name: "Bistro", category: "Ravintola", stars: 4.9, reviews: 120 },
-  { id: 2, type: "pizza",      position: [61.0574,  28.192  ], name: "Pizza Spot", category: "Pizza ja kebab", stars: 4.5, reviews: 98 },
-  { id: 3, type: "vegan",      position: [61.0558,  28.1892 ], name: "Green Bowl", category: "Kasvisruoka", stars: 4.7, reviews: 54 },
-];
-
-function SetViewOnClick({ animateRef }: { animateRef: React.RefObject<boolean> }) {
-  const map = useMapEvent("click", (e) => {
-    map.setView(e.latlng, map.getZoom(), { animate: animateRef.current || false });
-  });
-  return null;
-}
-
-function MapBoundsTracker({ onBoundsChange }: { onBoundsChange: (visible: Place[]) => void }) {
-  const map = useMap();
-
-  const update = () => {
-    const bounds = map.getBounds();
-    onBoundsChange(places.filter((p) => bounds.contains(p.position)));
-  };
-
-  useMapEvent("moveend", update);
-  useMapEvent("zoomend", update);
-  useEffect(() => { update(); }, []);
-
-  return null;
-}
-
 function Home() {
   const animateRef = useRef(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [restaurantSelected, setRestaurantSelected] = useState<Place | null>(null);
   const [visiblePlaces, setVisiblePlaces] = useState<Place[]>([]);
   const [searchValue, setSearchValue] = useState("");
 
+  const orderedVisiblePlaces = restaurantSelected
+    ? [
+      restaurantSelected,
+      ...visiblePlaces.filter((p) => p.id !== restaurantSelected.id),
+    ]
+    : visiblePlaces;
+
   return (
-    <div className="relative h-screen w-full">
+    <div className="relative min-h-dvh w-full overflow-hidden">
       {/* Search bar — overlays the map at the top */}
-      <div className="fixed top-4 z-[1000] inset-x-0 flex justify-center px-4 pointer-events-none">
+      <div className="fixed top-4 z-[1100] inset-x-0 flex justify-center px-4 pointer-events-none">
         <div className="pointer-events-auto">
           <SearchBar value={searchValue} onChange={setSearchValue} />
         </div>
@@ -68,8 +42,9 @@ function Home() {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <SetViewOnClick animateRef={animateRef} />
-        <MapBoundsTracker onBoundsChange={setVisiblePlaces} />
+        <SetViewOnClick animateRef={animateRef} onMapClick={() => setRestaurantSelected(null)} />
+        <MapBoundsTracker places={places} onBoundsChange={setVisiblePlaces} />
+        <MapSelectionFocus restaurant={restaurantSelected} animateRef={animateRef} />
         {places.map((p) => (
           <MapPinMarker
             key={p.id}
@@ -77,14 +52,22 @@ function Home() {
             type={p.type}
             size={40}
             popup={p.name}
+            setRestaurantEvent={() => {
+              setSidebarOpen(true);
+              setRestaurantSelected(p);
+            }}
           />
         ))}
       </MapContainer>
 
+      <MobileRestaurantSheet
+        restaurant={restaurantSelected}
+        onClose={() => setRestaurantSelected(null)}
+      />
+
       <div
-        className={`absolute z-1000 top-0 right-0 h-full hidden md:flex flex-col transition-all duration-300 bg-linear-to-r from-transparent from-0% via-neutral/70 via-30% to-neutral to-60% ${
-          sidebarOpen ? "w-80" : "w-10"
-        }`}
+        className={`absolute z-1000 top-0 right-0 h-full hidden md:flex flex-col transition-all duration-300 bg-linear-to-r from-transparent from-0% via-neutral/70 via-30% to-neutral to-60% ${sidebarOpen ? "w-100" : "w-10"
+          }`}
       >
         <button
           onClick={() => setSidebarOpen((o) => !o)}
@@ -94,17 +77,25 @@ function Home() {
         </button>
 
         {sidebarOpen && (
-          <div className="overflow-y-auto flex flex-col gap-3 pb-24 px-3 pt-2">
-            {visiblePlaces.map((p) => (
-              <RestaurantCard
+          <motion.div layout className="overflow-y-auto flex flex-col gap-3 pb-24 px-3 pt-2">
+            {orderedVisiblePlaces.map((p) => (
+              <motion.div
                 key={p.id}
-                name={p.name}
-                category={p.category}
-                stars={p.stars}
-                reviews={p.reviews}
-              />
-            ))}
-          </div>
+                layout
+                initial={false}
+                transition={{ type: "spring", stiffness: 420, damping: 34, mass: 0.75 }}
+              >
+                <RestaurantCard
+                  restaurant={p}
+                  isExpanded={restaurantSelected?.id === p.id}
+                  onToggleMoreInfo={() => {
+                    setRestaurantSelected((current) => (current?.id === p.id ? null : p));
+                  }}
+                />
+              </motion.div>
+            ))
+            }
+          </motion.div>
         )}
       </div>
     </div>
