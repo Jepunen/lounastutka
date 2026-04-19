@@ -3,7 +3,7 @@ import { IoLocationSharp, IoListSharp, IoSettingsOutline } from "react-icons/io5
 
 const tabs = [
   { label: "Kartta", icon: IoLocationSharp, path: "/" },
-  { label: "Komponentit", icon: IoListSharp, path: "/components" },
+  { label: "Lista", icon: IoListSharp, path: "/list" },
   { label: "Asetukset", icon: IoSettingsOutline, path: "/settings" },
 ] as const;
 
