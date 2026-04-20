@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useRef, useState } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
-import { MapBoundsTracker, MapSelectionFocus, SetViewOnClick } from "~/components/map/MapBehavior";
+import { MapBoundsTracker, MapSelectionFocus, SetViewOnClick, UserLocationControl } from "~/components/map/MapBehavior";
 import { IoChevronBackSharp, IoChevronForwardSharp } from "react-icons/io5";
 import MobileRestaurantSheet from "~/components/MobileRestaurantSheet";
 import MapPinMarker from "~/components/MapPin";
@@ -30,21 +30,24 @@ function Home() {
 
   return (
     <div className="relative min-h-dvh w-full overflow-hidden">
-      {/* Search bar — overlays the map at the top */}
-      <div className="fixed top-4 z-[1100] inset-x-0 flex justify-center px-4 pointer-events-none">
-        <div className="pointer-events-auto">
-          <SearchBar value={searchValue} onChange={setSearchValue} />
-        </div>
+      <div className="pointer-events-none fixed left-1/2 top-4 z-[1100] -translate-x-1/2 px-4">
+        <SearchBar
+          value={searchValue}
+          onChange={setSearchValue}
+          className="pointer-events-auto w-[min(34rem,calc(100vw-10rem))]"
+        />
       </div>
 
       <MapContainer center={[61.05692, 28.19061]} zoom={15} scrollWheelZoom={true} className="h-full w-full">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          referrerPolicy="origin-when-cross-origin"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <SetViewOnClick animateRef={animateRef} onMapClick={() => setRestaurantSelected(null)} />
         <MapBoundsTracker places={places} onBoundsChange={setVisiblePlaces} />
         <MapSelectionFocus restaurant={restaurantSelected} animateRef={animateRef} />
+        <UserLocationControl />
         {places.map((p) => (
           <MapPinMarker
             key={p.id}
