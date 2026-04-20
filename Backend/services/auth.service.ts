@@ -17,6 +17,19 @@ import {
   verifyAuthenticationResponse,
 } from "@simplewebauthn/server";
 
+import type {
+  RegistrationResponseJSON,
+  AuthenticationResponseJSON,
+  VerifiedAuthenticationResponse,
+  VerifiedRegistrationResponse,
+  VerifyRegistrationResponseOpts,
+  VerifyAuthenticationResponseOpts,
+  GenerateAuthenticationOptionsOpts,
+  GenerateRegistrationOptionsOpts,
+  PublicKeyCredentialCreationOptionsJSON,
+  PublicKeyCredentialRequestOptionsJSON
+} from "@simplewebauthn/server";
+
 // Global error class
 import { AppError } from "../utils/error.ts";
 
@@ -32,7 +45,7 @@ export async function registerPassword(email: string, password: string) {
 
   if (!user) {
     const passwordHash = await Bun.password.hash(password);
-    return db.createUserWithPassword(normalizedEmail, passwordHash);
+    return await db.createUserWithPassword(normalizedEmail, passwordHash);
   }
 
   const existingPasskeys = await db.getPasskeys(user.id);
@@ -43,7 +56,7 @@ export async function registerPassword(email: string, password: string) {
   const passwordHash = await Bun.password.hash(password);
   await db.updateUserPassword(user.id, passwordHash);
   // Update the reference
-  return db.getUserByEmail(user.email);
+  return await db.getUserByEmail(user.email);
 }
 
 export async function loginPassword(email: string, password: string) {
@@ -64,11 +77,13 @@ export async function loginPassword(email: string, password: string) {
 // Used for the authentication for controller, its not best but should suffice for error logging.
 export async function getUserByEmail(email: string) {
   const normalizedEmail = email.trim().toLowerCase();
-  return db.getUserByEmail(normalizedEmail);
+  return await db.getUserByEmail(normalizedEmail);
 }
 
 // src: https://simplewebauthn.dev/docs/packages/server#1-generate-registration-options
-export async function createRegistrationOptions(email: string, rpID: string, rpName: string) {
+export async function createRegistrationOptions(
+  email: string, rpID: string, rpName: string
+): Promise<PublicKeyCredentialCreationOptionsJSON> {
   const normalizedEmail = email.trim().toLowerCase();
   let user = await db.getUserByEmail(normalizedEmail);
 
@@ -85,9 +100,9 @@ export async function createRegistrationOptions(email: string, rpID: string, rpN
 
   // Generates the options that can register the user through mobile passkeys
   // Also makes the challenge that the user needs to solve
-  const options = await generateRegistrationOptions({
-    rpName,
-    rpID,
+  const generateOptions: GenerateRegistrationOptionsOpts = {
+    rpName: rpName,
+    rpID: rpID,
     userName: user.email,
     userDisplayName: user.email,
     attestationType: "none",
@@ -102,8 +117,10 @@ export async function createRegistrationOptions(email: string, rpID: string, rpN
       userVerification: "preferred",
     },
     supportedAlgorithmIDs: [-7, -257],
-  });
+  };
 
+  const options: PublicKeyCredentialCreationOptionsJSON = await generateRegistrationOptions(generateOptions);
+  if (!options) throw new AppError("Could not create account.", 400);
   await db.storeChallenge(user.id, (options).challenge);
 
   return options;
@@ -112,14 +129,15 @@ export async function createRegistrationOptions(email: string, rpID: string, rpN
 
 export async function verifyRegistration(
   email: string,
-  attestationResponse: any,
+  attestationResponse: RegistrationResponseJSON,
   expectedOrigin: string,
-  expectedRPID: string) {
+  expectedRPID: string):
+  Promise<VerifiedRegistrationResponse> {
 
   const normalizedEmail = email.trim().toLowerCase();
   const user = await db.getUserByEmail(normalizedEmail);
 
-  if (!user) return null;
+  if (!user) throw new AppError("Invalid authentication request", 400);
 
   const existingPasskeys = await db.getPasskeys(user.id);
 
@@ -131,14 +149,16 @@ export async function verifyRegistration(
   const expectedChallenge = await db.getChallenge(user.id);
   if (!expectedChallenge) throw new AppError("Challenge was invalid", 400);
 
-  // Check if the user solved challenge correctly
-  const verification = await verifyRegistrationResponse({
+  const verifyOptions: VerifyRegistrationResponseOpts = {
     response: attestationResponse,
     expectedChallenge,
     expectedOrigin,
     expectedRPID,
     requireUserVerification: true,
-  });
+  };
+
+  // Check if the user solved challenge correctly
+  const verification: VerifiedRegistrationResponse = await verifyRegistrationResponse(verifyOptions);
 
   const { verified, registrationInfo } = verification;
 
@@ -166,16 +186,18 @@ export async function verifyRegistration(
   return verification;
 }
 
-export async function createAuthenticationOptions(email: string, rpID: string) {
+export async function createAuthenticationOptions(
+  email: string, rpID: string
+): Promise<PublicKeyCredentialRequestOptionsJSON> {
   const normalizedEmail = email.trim().toLowerCase();
 
   const user = await db.getUserByEmail(normalizedEmail);
 
-  if (!user) return null;
+  if (!user) throw new AppError("Invalid authentication request", 400);
 
   const passkeys = await db.getPasskeys(user.id);
 
-  const options = await generateAuthenticationOptions({
+  const authenticationOptions: GenerateAuthenticationOptionsOpts = {
     rpID,
     userVerification: "preferred",
     allowCredentials: passkeys.map((pk) => ({
@@ -183,7 +205,10 @@ export async function createAuthenticationOptions(email: string, rpID: string) {
       type: "public-key",
       transports: pk.transports,
     })),
-  });
+  };
+  const options: PublicKeyCredentialRequestOptionsJSON = await generateAuthenticationOptions(authenticationOptions);
+
+  if (!options) throw new AppError("Could not verify account.", 400);
 
   const challenge = (options).challenge;
   await db.storeChallenge(user.id, challenge);
@@ -194,25 +219,25 @@ export async function createAuthenticationOptions(email: string, rpID: string) {
 
 export async function verifyAuthentication(
   email: string,
-  assertionResponse: any,
+  assertionResponse: AuthenticationResponseJSON,
   expectedOrigin: string,
   expectedRPID: string,
-) {
+): Promise<VerifiedAuthenticationResponse> {
   const normalizedEmail = email.trim().toLowerCase();
 
   const user = await db.getUserByEmail(normalizedEmail);
-  if (!user) return { verified: false, error: "Unknown user" };
+  if (!user) throw new AppError("Unknown user", 400);
 
   const expectedChallenge = await db.getChallenge(user.id);
-  if (!expectedChallenge) return { verified: false, error: "Unknown challenge" };
+  if (!expectedChallenge) throw new AppError("Unknown challenge", 401);
 
   // NOTE: Probably should use only one or allow only one or properly support multiplpe
   const passkeys = await db.getPasskeys(user.id);
   const credId = assertionResponse.id;
   const validCred = passkeys.find(pk => pk.id === credId);
-  if (!validCred) return { verified: false, error: "Unknown credential" };
+  if (!validCred) throw new AppError("Unknown credential.", 401);
 
-  const verification = await verifyAuthenticationResponse({
+  const verifyOptions: VerifyAuthenticationResponseOpts = {
     response: assertionResponse,
     expectedChallenge,
     expectedOrigin,
@@ -224,7 +249,9 @@ export async function verifyAuthentication(
       transports: validCred.transports,
     },
     requireUserVerification: true,
-  });
+  };
+
+  const verification: VerifiedAuthenticationResponse = await verifyAuthenticationResponse(verifyOptions);
 
   if (verification.verified) {
     // For authentication (login) we should update the counter
