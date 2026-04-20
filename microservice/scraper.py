@@ -1,10 +1,14 @@
-from fastapi import FastAPI
 import requests
 from bs4 import BeautifulSoup
 import re
+from fastapi import FastAPI
+from pydantic import BaseModel
+from typing import List
 
 app = FastAPI()
 
+# scraper code
+"""
 def geocode_address(address):
     url = "https://nominatim.openstreetmap.org/search"
     params = {"q": address, "format": "json", "limit": 1}
@@ -53,10 +57,45 @@ def scrape(url):
             })
 
     return results
+"""
+
+class ScrapeRequest(BaseModel):
+    urls: List[str]
+
+
+# Mock restaurant data
+def get_mock_restaurant():
+    return {
+        "id": 1,
+        "type": "restaurant",
+        "position": [61.05692, 28.19061],
+        "name": "Aalef",
+        "category": "Ravintola",
+        "stars": 4.9,
+        "reviews": 120,
+        "address": "Villimiehenkatu 1",
+        "description": "something",
+        "todayHours": "10:00-15:00",
+        "lunchTime": "11:00-14:00",
+        "priceLevel": "Lunch 12 EUR",
+        "phone": "9999",
+        "website": "https://example.fi",
+        "tags": ["something", "test", "vegetarian"],
+        "todayMenu": ["Salmon", "bread", "soup"],
+    }
 
 
 @app.post("/scrape")
-def scrape_urls(payload: dict):
+def scrape(request: ScrapeRequest):
+    results = []
+
+    #return mock data per URL
+    for _ in request.urls:
+        results.append(get_mock_restaurant())
+
+    return results
+
+    """def scrape_urls(payload: dict):
     urls = payload.get("urls", [])
     all_results = []
 
@@ -67,4 +106,9 @@ def scrape_urls(payload: dict):
         except Exception as e:
             print("Error:", e)
 
-    return all_results
+    return all_results"""
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
