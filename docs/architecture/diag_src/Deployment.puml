@@ -24,6 +24,9 @@ Deployment_Node(ci, "GitHub Actions", "CI/CD Pipeline") {
 Deployment_Node(hetzner, "Hetzner VPS", "4 vCPUs, 16GB RAM, 40GB SSD") {
 
     Deployment_Node(swarm, "Docker Swarm", "Container Environment") {
+        Deployment_Node(protainerNode, "Portainer Service", "Docker Service") {
+            Container(portainer, "Portainer", "Portainer", "Allows access to the docker swarm environment for log inspection and control.")
+        }
 
         Deployment_Node(traefikNode, "Traefik Reverse Proxy", "Docker Service") {
             Container(traefik, "Traefik", "Traefik", "Handles HTTPS termination, routing, and load balancing.")
