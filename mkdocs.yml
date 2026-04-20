@@ -17,6 +17,7 @@ watch:
   - mkdocs.yml
   - Backend/README.md
   - Frontend/README.md
+  - Database/README.md
   - docs/
 
 theme: readthedocs
