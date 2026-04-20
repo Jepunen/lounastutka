@@ -110,7 +110,7 @@ export function UserLocationControl() {
 
   return (
     <>
-      <div className="pointer-events-auto fixed right-4 top-4 md:left-4 md:right-auto md:top-20" style={{ zIndex: 1100 }}>
+      <div className="pointer-events-auto fixed right-4 top-5 md:left-15 md:right-auto md:top-2" style={{ zIndex: 1100 }}>
         <Button
           variant="primary"
           onClick={async () => {
