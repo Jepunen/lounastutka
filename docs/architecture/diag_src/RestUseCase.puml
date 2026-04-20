@@ -1,0 +1,47 @@
+@startuml RestaurantUserUseCase
+
+' Using default plantuml due to C4 model library not supporting use cases.
+' src: https://plantuml.com/use-case-diagram
+
+title Use Case – Restaurant User Adding Restaurant Information
+
+' The user
+actor "Restaurant User" as RestUser
+
+' Boundary for the system within actions happen
+rectangle "Lounastutka Web Application" {
+  usecase "Open Website" as UC1
+  usecase "Register / Login" as UC2
+  usecase "Access Restaurant Management View" as UC3
+  usecase "Add Restaurant Information Manually" as UC4
+  usecase "Submit Restaurant Website URL" as UC5
+  usecase "Receive Success Confirmation" as UC6
+  usecase "Receive Error + Support Contact" as UC7
+  usecase "Leave Website" as UC8
+}
+
+' Relations 
+RestUser --> UC1 : navigates to
+RestUser --> UC2 : authenticates
+RestUser --> UC3 : enters management view
+RestUser --> UC4 : fills form
+RestUser --> UC5 : submits URL
+RestUser --> UC6 : if successful
+RestUser --> UC7 : if failed
+RestUser --> UC8 : closes session
+
+UC2 --> UC3 : grants access
+UC4 --> UC6 : success
+UC5 --> UC6 : success
+UC4 --> UC7 : failure
+UC5 --> UC7 : failure
+
+legend right
+    | Symbol| Meaning |
+    | Rectangle | Boundary |
+    | Stickman | User |
+    | Ellipse | Use-case |
+    | Arrow | Action |
+endlegend
+
+@enduml
