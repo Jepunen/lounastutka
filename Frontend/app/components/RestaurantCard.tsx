@@ -18,6 +18,7 @@ export interface RestaurantCardProps {
     category: string;
     stars: number;
     reviews: number;
+    distanceLabel?: string;
     address?: string;
     description?: string;
     todayHours?: string;
@@ -44,6 +45,7 @@ const RestaurantCard = ({
     category,
     stars,
     reviews,
+    distanceLabel,
     address,
     description,
     todayHours,
@@ -65,12 +67,19 @@ const RestaurantCard = ({
         <div className="w-24 h-24 rounded-xl bg-gray flex items-center justify-center text-4xl text-dark/40 shrink-0">
           <IoImageOutline />
         </div>
-        <div className="flex flex-col gap-1 pt-1">
-          <span className="font-bold text-lg text-dark leading-tight">{name}</span>
-          <span className="text-secondary font-medium text-sm">{category}</span>
-          <Rating stars={stars} reviews={reviews} />
-
+        <div className=" flex flex-row min-w-0 justify-between">
+          <div className="flex flex-col gap-1 pt-1">
+            <span className="font-bold text-lg text-dark leading-tight">{name}</span>
+            <span className="text-secondary font-medium text-sm">{category}</span>
+            <Rating stars={stars} reviews={reviews} />
+          </div>
         </div>
+        {distanceLabel && (
+          <div className="flex items-center gap-1 text-2xl font-semibold text-primary pb-12">
+            <IoLocationOutline className="text-base" />
+            <span>{distanceLabel}</span>
+          </div>
+        )}
       </div>
       <AnimatePresence initial={false}>
         {isExpanded && (

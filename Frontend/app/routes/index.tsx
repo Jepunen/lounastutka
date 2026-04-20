@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
 import { MapBoundsTracker, MapSelectionFocus, SetViewOnClick, UserLocationControl } from "~/components/map/MapBehavior";
 import { IoChevronBackSharp, IoChevronForwardSharp } from "react-icons/io5";
@@ -9,6 +9,13 @@ import MapPinMarker from "~/components/MapPin";
 import RestaurantCard from "~/components/RestaurantCard";
 import { places, type Place } from "~/data/places";
 import SearchBar from "~/components/SearchBar";
+import { calculateDistanceMeters, formatDistance } from "~/utils/distance";
+import { useUserLocation } from "~/components/UserLocationProvider";
+
+type PlaceWithDistance = Place & {
+  distanceMeters?: number;
+  distanceLabel?: string;
+};
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -20,17 +27,39 @@ function Home() {
   const [restaurantSelected, setRestaurantSelected] = useState<Place | null>(null);
   const [visiblePlaces, setVisiblePlaces] = useState<Place[]>([]);
   const [searchValue, setSearchValue] = useState("");
+  const { position: userPosition } = useUserLocation();
 
-  const orderedVisiblePlaces = restaurantSelected
-    ? [
-      restaurantSelected,
-      ...visiblePlaces.filter((p) => p.id !== restaurantSelected.id),
-    ]
-    : visiblePlaces;
+  const placesWithDistance = useMemo<PlaceWithDistance[]>(
+    () =>
+      places.map((place) => ({
+        ...place,
+        distanceMeters: userPosition ? calculateDistanceMeters(userPosition, place.position) : undefined,
+        distanceLabel: userPosition ? formatDistance(calculateDistanceMeters(userPosition, place.position)) : undefined,
+      })),
+    [userPosition],
+  );
+
+  const visiblePlacesWithDistance = useMemo<PlaceWithDistance[]>(
+    () =>
+      visiblePlaces
+        .map((place): PlaceWithDistance => {
+          const placeWithDistance = placesWithDistance.find((candidate) => candidate.id === place.id);
+          return placeWithDistance ?? { ...place, distanceMeters: undefined, distanceLabel: undefined };
+        })
+        .sort((left, right) => (left.distanceMeters ?? Number.POSITIVE_INFINITY) - (right.distanceMeters ?? Number.POSITIVE_INFINITY)),
+    [placesWithDistance, visiblePlaces],
+  );
+
+  const selectedRestaurantWithDistance = useMemo(
+    () => (restaurantSelected ? placesWithDistance.find((place) => place.id === restaurantSelected.id) ?? restaurantSelected : null),
+    [placesWithDistance, restaurantSelected],
+  );
+
+  const orderedVisiblePlaces = visiblePlacesWithDistance;
 
   return (
     <div className="relative min-h-dvh w-full overflow-hidden">
-      <div className="pointer-events-none fixed left-1/2 top-4 z-[1100] -translate-x-1/2 px-4">
+      <div className="pointer-events-none fixed left-1/2 top-4 -translate-x-1/2 px-4" style={{ zIndex: 1100 }}>
         <SearchBar
           value={searchValue}
           onChange={setSearchValue}
@@ -48,7 +77,7 @@ function Home() {
         <MapBoundsTracker places={places} onBoundsChange={setVisiblePlaces} />
         <MapSelectionFocus restaurant={restaurantSelected} animateRef={animateRef} />
         <UserLocationControl />
-        {places.map((p) => (
+        {placesWithDistance.map((p) => (
           <MapPinMarker
             key={p.id}
             position={p.position}
@@ -64,7 +93,7 @@ function Home() {
       </MapContainer>
 
       <MobileRestaurantSheet
-        restaurant={restaurantSelected}
+        restaurant={selectedRestaurantWithDistance}
         onClose={() => setRestaurantSelected(null)}
       />
 

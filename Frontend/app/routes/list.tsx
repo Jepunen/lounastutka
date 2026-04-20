@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { IoRestaurantOutline, IoPizzaOutline, IoLeafOutline, IoSearchOutline } from "react-icons/io5";
 import RestaurantCard from "~/components/RestaurantCard";
 import { places, type Place } from "~/data/places";
+import { calculateDistanceMeters, formatDistance } from "~/utils/distance";
+import { useUserLocation } from "~/components/UserLocationProvider";
 
 export const Route = createFileRoute("/list")({
   component: ListView,
@@ -16,21 +18,38 @@ const typeFilters = [
   { label: "Kasvis", value: "vegan" as Place["type"], icon: IoLeafOutline },
 ];
 
+type PlaceWithDistance = Place & {
+  distanceMeters?: number;
+  distanceLabel?: string;
+};
+
 function ListView() {
   const [search, setSearch] = useState("");
   const [activeType, setActiveType] = useState<Place["type"] | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const { position: userPosition } = useUserLocation();
 
-  const filtered = places.filter((p) => {
-    const matchesType = activeType === null || p.type === activeType;
+  const filtered = useMemo<PlaceWithDistance[]>(() => {
     const q = search.toLowerCase();
-    const matchesSearch =
-      q === "" ||
-      p.name.toLowerCase().includes(q) ||
-      p.category.toLowerCase().includes(q) ||
-      p.tags?.some((t) => t.toLowerCase().includes(q));
-    return matchesType && matchesSearch;
-  });
+
+    return places
+      .filter((place) => {
+        const matchesType = activeType === null || place.type === activeType;
+        const matchesSearch =
+          q === "" ||
+          place.name.toLowerCase().includes(q) ||
+          place.category.toLowerCase().includes(q) ||
+          place.tags?.some((tag) => tag.toLowerCase().includes(q));
+
+        return matchesType && matchesSearch;
+      })
+      .map((place) => ({
+        ...place,
+        distanceMeters: userPosition ? calculateDistanceMeters(userPosition, place.position) : undefined,
+        distanceLabel: userPosition ? formatDistance(calculateDistanceMeters(userPosition, place.position)) : undefined,
+      }))
+      .sort((left, right) => (left.distanceMeters ?? Number.POSITIVE_INFINITY) - (right.distanceMeters ?? Number.POSITIVE_INFINITY));
+  }, [activeType, search, userPosition]);
 
   return (
     <div className="min-h-dvh bg-neutral flex flex-col items-center">
@@ -59,11 +78,10 @@ function ListView() {
               <button
                 key={label}
                 onClick={() => setActiveType(value)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap border transition-colors duration-150 cursor-pointer ${
-                  active
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap border transition-colors duration-150 cursor-pointer ${active
                     ? "bg-primary text-neutral border-primary"
                     : "bg-white text-dark/70 border-dark/10 hover:border-dark/20"
-                }`}
+                  }`}
               >
                 {Icon && <Icon className="text-base" />}
                 {label}

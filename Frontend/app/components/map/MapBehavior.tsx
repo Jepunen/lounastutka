@@ -1,24 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect } from "react";
 import type { RefObject } from "react";
 import { CircleMarker, Popup, useMap, useMapEvent } from "react-leaflet";
 import type { Place } from "~/data/places";
 import Button from "../Button";
 import { IoLocateOutline } from "react-icons/io5";
-
-type UserPosition = [number, number];
-
-function getGeolocationErrorMessage(error: GeolocationPositionError) {
-  switch (error.code) {
-    case error.PERMISSION_DENIED:
-      return "Paikannus estetty. Salli paikannus käyttääksesi tätä ominaisuutta.";
-    case error.POSITION_UNAVAILABLE:
-      return "Paikannustiedot eivät saatavilla.";
-    case error.TIMEOUT:
-      return "Paikannusyritys aikakatkaistiin.";
-    default:
-      return "Paikannuksessa tapahtui tuntematon virhe.";
-  }
-}
+import { useUserLocation } from "~/components/UserLocationProvider";
+import type { UserPosition } from "~/components/UserLocationProvider";
 
 export function SetViewOnClick({
   animateRef,
@@ -114,87 +101,24 @@ export function MapSelectionFocus({
 
 export function UserLocationControl() {
   const map = useMap();
-  const [position, setPosition] = useState<UserPosition | null>(null);
-  const [watchId, setWatchId] = useState<number | null>(null);
-  const [isLocating, setIsLocating] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const geolocationSupported = useMemo(
-    () => typeof navigator !== "undefined" && "geolocation" in navigator,
-    [],
-  );
+  const { position, isLocating, errorMessage, locateUser } = useUserLocation();
 
   const centerToPosition = (coords: UserPosition) => {
     const zoom = Math.max(map.getZoom(), 15);
     map.setView(coords, zoom, { animate: true });
   };
 
-  const startWatch = () => {
-    if (!geolocationSupported || watchId !== null) {
-      return;
-    }
-
-    const createdWatchId = navigator.geolocation.watchPosition(
-      (geoPosition) => {
-        setPosition([geoPosition.coords.latitude, geoPosition.coords.longitude]);
-        setErrorMessage(null);
-      },
-      (geoError) => {
-        setErrorMessage(getGeolocationErrorMessage(geoError));
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 15000,
-      },
-    );
-
-    setWatchId(createdWatchId);
-  };
-
-  const locateUser = () => {
-    if (!geolocationSupported) {
-      setErrorMessage("Paikannusta ei tueta tässä laitteessa.");
-      return;
-    }
-
-    setIsLocating(true);
-
-    navigator.geolocation.getCurrentPosition(
-      (geoPosition) => {
-        const coords: UserPosition = [geoPosition.coords.latitude, geoPosition.coords.longitude];
-        setPosition(coords);
-        setErrorMessage(null);
-        centerToPosition(coords);
-        startWatch();
-        setIsLocating(false);
-      },
-      (geoError) => {
-        setErrorMessage(getGeolocationErrorMessage(geoError));
-        setIsLocating(false);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 15000,
-      },
-    );
-  };
-
-  useEffect(() => {
-    return () => {
-      if (watchId !== null && geolocationSupported) {
-        navigator.geolocation.clearWatch(watchId);
-      }
-    };
-  }, [geolocationSupported, watchId]);
-
   return (
     <>
-      <div className="pointer-events-auto fixed right-4 top-5.5 z-[1100] md:left-0 md:right-auto md:top-20">
+      <div className="pointer-events-auto fixed right-4 top-4 md:left-4 md:right-auto md:top-20" style={{ zIndex: 1100 }}>
         <Button
           variant="primary"
-          onClick={locateUser}
+          onClick={async () => {
+            const coords = await locateUser();
+            if (coords) {
+              centerToPosition(coords);
+            }
+          }}
           className="h-10 w-10 min-w-10 shrink-0 rounded-full p-0 shadow-lg"
           aria-label="Keskitä omaan sijaintiin"
         >
