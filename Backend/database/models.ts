@@ -53,4 +53,30 @@ export type PasskeyModel = {
 	transports?: AuthenticatorTransportFuture[];
 };
 
+export type RestaurantModel = {
+	id?: number;
+	name: string;
+	address?: string;
+	lat?: number;
+	lon?: number;
+	category?: string;
+	description?: string;
+	phone?: string;
+	website?: string;
+	priceLevel?: string;
+	stars?: number;
+	reviews?: number;
+};
+
+export type MenuModel = {
+	id?: number;
+	restaurantId: number;
+	date?: Date;
+};
+
+export type MenuItemModel = {
+	id?: number;
+	menuId: number;
+	name: string;
+};
 

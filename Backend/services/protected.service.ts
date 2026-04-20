@@ -21,10 +21,10 @@ export async function parseWebsiteBasedOnURL(restaurantUrl: string) {
   if (!res) throw new AppError("Site parsing failed", 500);
   const data = await res.json();
   if (!data) throw new AppError("Data could not be parsed", 400);
-  // TODO: Store the data to database
-  // const dbRes = await db.addRestaurantData(tsFormattedData);
-  // WARNING: unsure what to return at this point from the microservice.
-  return true;
+
+  const restaurantId = await db.addRestaurantData(data); // data is formatted in helpers.ts (type ScrapedRestaurant)
+
+  return restaurantId;
 }
 
 // TODO: Database schema based typescript model here
