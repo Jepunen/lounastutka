@@ -6,7 +6,7 @@ import db from "../database/helpers";
 // Call the Microservice for parsing the website based on the given URL
 // then store the information to the database if its valid.
 export async function parseWebsiteBasedOnURL(restaurantUrl: string) {
-  const microserviceUrl = process.env.MICROSERVICE_URL ?? "http://microservice/scrape";
+  const microserviceUrl = process.env.MICROSERVICE_URL ?? "http://microservice:8100/scrape";
   const res = await fetch(microserviceUrl, {
     method: "POST",
     headers: {
@@ -14,7 +14,7 @@ export async function parseWebsiteBasedOnURL(restaurantUrl: string) {
     },
     body: JSON.stringify(
       {
-        urls: restaurantUrl
+        urls: [restaurantUrl]
       }),
   });
 
