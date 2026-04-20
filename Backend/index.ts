@@ -24,7 +24,6 @@ app.use(cors());
 
 // NOTE: Use the routes from "routes/" here:
 // When unsure, use ALL...
-app.use("/auth", authorizationRoutes);
 app.use("/api/auth", authorizationRoutes);
 app.use("/api/protected", protectedRoutes);
 
