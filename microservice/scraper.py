@@ -60,7 +60,7 @@ def scrape(url):
 """
 
 class ScrapeRequest(BaseModel):
-    urls: List[str]
+    urls: str
 
 
 # Mock restaurant data
@@ -87,13 +87,8 @@ def get_mock_restaurant():
 
 @app.post("/scrape")
 def scrape(request: ScrapeRequest):
-    results = []
 
-    #return mock data per URL
-    for _ in request.urls:
-        results.append(get_mock_restaurant())
-
-    return results
+    return get_mock_restaurant()
 
     """def scrape_urls(payload: dict):
     urls = payload.get("urls", [])

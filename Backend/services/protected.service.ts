@@ -14,7 +14,7 @@ export async function parseWebsiteBasedOnURL(restaurantUrl: string) {
     },
     body: JSON.stringify(
       {
-        urls: [restaurantUrl]
+        urls: restaurantUrl
       }),
   });
 
