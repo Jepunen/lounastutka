@@ -87,6 +87,19 @@ and in routes/protected.routes.ts
 **middlewares/:** This folder includes all of the custom middleware methods such as email & password verification and token verification.
 
 
+#### API Documentation
+
+The API documentation is built from the developer written `typedoc` [style](https://typedoc.org/) code comments and typedoc parsed method declarations. The documentation index.html can be created with:
+
+```bash
+[Backend]$ bun run typedoc EntryStrategy Expand routes/* controllers/* middleware/* 
+```
+
+, this should create the new files under `Backend/docs/` folder. 
+
+**NOTE:** For better documentation, strong typing is recommended as typedoc can and will complain if there are 'any' types around.
+
+
 #### Error handling
 
 Currently there exists only the generic error handling code that shows the end-user generic error code rather than showing the full stack from backend as it could potentially contain protected information and in the end wouldn't help a normal user. This relies on the fact that when developing and using error messages, it is important to differentiate what types of errors the user should see and what should remain under the maintainers logs, e.g. 4xx codes vs 5xx codes. 

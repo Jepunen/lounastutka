@@ -1,0 +1,37 @@
+@startuml BasicUserUseCase
+
+' Using default plantuml due to C4 model library not supporting use cases.
+' src: https://plantuml.com/use-case-diagram
+
+title Use Case – Basic User Browsing Restaurant Menus
+
+actor "Basic User" as BasicUser
+
+rectangle "Lounastutka Web Application" {
+  usecase "Open Website" as UC1
+  usecase "View Map with Restaurants" as UC2
+  usecase "Select Restaurant Pin" as UC3
+  usecase "View Restaurant Details\n(Menu, Address, Name, etc.)" as UC4
+  usecase "Leave Website" as UC5
+}
+
+' Relations
+BasicUser --> UC1 : navigates to
+BasicUser --> UC2 : browses
+BasicUser --> UC3 : selects
+BasicUser --> UC4 : reads
+BasicUser --> UC5 : closes session
+
+UC1 --> UC2 : loads map
+UC2 --> UC3 : shows pins
+UC3 --> UC4 : loads details
+
+legend right
+    | Symbol| Meaning |
+    | Rectangle | Boundary |
+    | Stickman | User |
+    | Ellipse | Use-case |
+    | Arrow | Action |
+endlegend
+
+@enduml
