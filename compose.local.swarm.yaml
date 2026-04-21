@@ -86,6 +86,23 @@ services:
         - "traefik.http.routers.frontend.entrypoints=web"
         - "traefik.http.services.frontend.loadbalancer.server.port=80"
 
+  microservice:
+    image: lounastutka-microservice:local
+    networks:
+      - traefik_proxy
+      - backend
+    expose:
+      - "8100"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.microservice.rule=Host(`localhost`) && PathPrefix(`/scraper`)"
+        - "traefik.http.routers.microservice.entrypoints=web"
+        - "traefik.http.services.microservice.loadbalancer.server.port=8100"
+
   db:
     image: postgres:16-alpine
     environment:

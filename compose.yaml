@@ -200,11 +200,27 @@ services:
           - node.role == manager
 
   microservice:
-    build:
-      context: ./microservice
-    container_name: microservice
+    image: ghcr.io/${GITHUB_REPOSITORY}/microservice:${IMAGE_TAG:-latest}
     networks:
+      - traefik_proxy
       - backend
+    expose:
+      - "8100"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        # Enable Service discovery for Traefik
+        - traefik.enable=true
+        # Define the microservice router rule
+        - traefik.http.routers.microservice.rule=Host(`lounastutka.fi`) && PathPrefix(`/scraper`)
+        # Expose the microservice on the HTTPS entrypoint
+        - traefik.http.routers.microservice.entrypoints=websecure
+        - traefik.http.routers.microservice.tls=true
+        - traefik.http.routers.microservice.tls.certresolver=le
+        # Expose the microservice port number to Traefik
+        - traefik.http.services.microservice.loadbalancer.server.port=8100
 
   # ---------------------------------------------
   # Monitoring: Prometheus
