@@ -12,6 +12,11 @@ nav:
     - Deployment: architecture/deployment.md
     - Data flow: architecture/dataflow.md
     - Use-case: architecture/usecase.md
+  - Environment:
+    - Docker: environment/docker.md
+    - Hetzner: environment/hetzner.md
+    - GitHub Actions: environment/github-actions.md
+    - Nginx: environment/nginx.md
 
 watch:
   - mkdocs.yml
