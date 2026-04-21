@@ -1,6 +1,11 @@
 // TODO: Ensure integration with the PostGreatSQL
 import { SQL } from "bun";
-import type { UserModel, PasskeyModel } from "./models.ts"
+import type { UserModel, PasskeyModel, RestaurantModel, MenuModel, MenuItemModel} from "./models.ts"
+
+type ScrapedRestaurant = RestaurantModel & {
+	position: [number, number];
+	todayMenu: string[];
+};
 
 // src: https://bun.com/docs/runtime/sql
 const pg = new SQL(
@@ -145,5 +150,61 @@ export default {
 		await pg`
 			UPDATE app.passkeys SET counter = ${counter} WHERE id = ${pkId} `;
 	},
-};
 
+	// restaurant info
+	async addRestaurantData(data: ScrapedRestaurant): Promise<number> {
+		const restaurantRes = await pg`
+			INSERT INTO app.restaurants 
+			(name, address, lat, lon, category, description, phone, website, price_level, stars, reviews)
+			VALUES (
+				${data.name},
+				${data.address},
+				${data.position?.[0]},
+				${data.position?.[1]},
+				${data.category},
+				${data.description},
+				${data.phone},
+				${data.website},
+				${data.priceLevel},
+				${data.stars},
+				${data.reviews}
+			)
+			RETURNING id
+		`;
+
+		if (!restaurantRes) throw new Error("Failed to insert restaurant");
+
+		const restaurantId = restaurantRes[0].id;
+
+		const menu: MenuModel = {
+			restaurantId,
+		};
+
+		const menuRes = await pg`
+			INSERT INTO app.menus (fk_restaurant)
+			VALUES (${menu.restaurantId})
+			RETURNING id
+		`;
+
+		if (!menuRes) throw new Error("Failed to insert menu");
+
+		const menuId = menuRes[0].id;
+
+		if (Array.isArray(data.todayMenu)) {
+			for (const item of data.todayMenu) {
+				const menuItem: MenuItemModel = {
+					menuId,
+					name: item,
+				};
+
+				await pg`
+					INSERT INTO app.menu_items (fk_menu, name)
+					VALUES (${menuItem.menuId}, ${menuItem.name})
+				`;
+			}
+		}
+
+		return restaurantId;
+	},
+	
+}

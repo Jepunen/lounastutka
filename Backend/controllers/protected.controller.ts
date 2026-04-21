@@ -24,7 +24,7 @@ export async function parseFromSite(req: AuthenticatedRequest, res: Response, ne
   } catch (error: unknown) {
     next(error);
   }
-  res.status(200).json({ msg: "Site parsed and added to the database." });
+  res.status(200).json({ msg: "Site parsed and added to the database.", restaurantID: res });
 }
 
 export async function addRestaurantInfo(req: AuthenticatedRequest, res: Response, next: NextFunction) {

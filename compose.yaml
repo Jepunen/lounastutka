@@ -199,6 +199,13 @@ services:
         constraints:
           - node.role == manager
 
+  microservice:
+    build:
+      context: ./microservice
+    container_name: microservice
+    networks:
+      - backend
+
   # ---------------------------------------------
   # Monitoring: Prometheus
   # ---------------------------------------------

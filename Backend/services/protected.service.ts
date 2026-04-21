@@ -6,7 +6,7 @@ import db from "../database/helpers";
 // Call the Microservice for parsing the website based on the given URL
 // then store the information to the database if its valid.
 export async function parseWebsiteBasedOnURL(restaurantUrl: string) {
-  const microserviceUrl = process.env.MICROSERVICE_URL ?? "http://microservice/scrape";
+  const microserviceUrl = process.env.MICROSERVICE_URL ?? "http://microservice:8100/scrape";
   const res = await fetch(microserviceUrl, {
     method: "POST",
     headers: {
@@ -21,10 +21,10 @@ export async function parseWebsiteBasedOnURL(restaurantUrl: string) {
   if (!res) throw new AppError("Site parsing failed", 500);
   const data = await res.json();
   if (!data) throw new AppError("Data could not be parsed", 400);
-  // TODO: Store the data to database
-  // const dbRes = await db.addRestaurantData(tsFormattedData);
-  // WARNING: unsure what to return at this point from the microservice.
-  return true;
+
+  const restaurantId = await db.addRestaurantData(data); // data is formatted in helpers.ts (type ScrapedRestaurant)
+
+  return restaurantId;
 }
 
 // TODO: Database schema based typescript model here
