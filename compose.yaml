@@ -214,7 +214,7 @@ services:
         # Enable Service discovery for Traefik
         - traefik.enable=true
         # Define the microservice router rule
-        - traefik.http.routers.microservice.rule=Host(`lounastutka.fi`) && PathPrefix(`/scraper`)
+        - traefik.http.routers.microservice.rule=Host(`lounastutka.fi`) && PathPrefix(`/scrape`)
         # Expose the microservice on the HTTPS entrypoint
         - traefik.http.routers.microservice.entrypoints=websecure
         - traefik.http.routers.microservice.tls=true

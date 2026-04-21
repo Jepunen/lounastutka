@@ -99,7 +99,7 @@ services:
         condition: on-failure
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.microservice.rule=Host(`localhost`) && PathPrefix(`/scraper`)"
+        - "traefik.http.routers.microservice.rule=Host(`localhost`) && PathPrefix(`/scrape`)"
         - "traefik.http.routers.microservice.entrypoints=web"
         - "traefik.http.services.microservice.loadbalancer.server.port=8100"
 
