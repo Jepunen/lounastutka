@@ -17,6 +17,7 @@ nav:
     - Hetzner: environment/hetzner.md
     - GitHub Actions: environment/github-actions.md
     - Nginx: environment/nginx.md
+    - Traefik: environment/traefik.md
 
 watch:
   - mkdocs.yml
