@@ -6,10 +6,24 @@ nav:
   - Frontend: frontend/index.md
   - Backend: backend/index.md
   - Database: database/index.md
+  - Architecture: 
+    - Description: architecture/index.md
+    - Microservice: architecture/microservice.md
+    - Deployment: architecture/deployment.md
+    - Data flow: architecture/dataflow.md
+    - Use-case: architecture/usecase.md
 
 watch:
   - mkdocs.yml
   - Backend/README.md
   - Frontend/README.md
+  - Database/README.md
   - docs/
+
 theme: readthedocs
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - pymdownx.blocks.caption
+

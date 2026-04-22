@@ -4,7 +4,7 @@ import type { Request, NextFunction, Response, Express } from "express";
 import cors from "cors";
 
 // NOTE: Custom error handler
-import errorHandler from "./utils/error.ts";
+import errorHandler from "./middleware/error.middleware.ts";
 
 // NOTE: Add routes from "routes/" here:
 import authorizationRoutes from "./routes/auth.routes";
@@ -24,7 +24,6 @@ app.use(cors());
 
 // NOTE: Use the routes from "routes/" here:
 // When unsure, use ALL...
-app.use("/auth", authorizationRoutes);
 app.use("/api/auth", authorizationRoutes);
 app.use("/api/protected", protectedRoutes);
 
@@ -34,20 +33,20 @@ app.use(errorHandler);
 const port = process.env.PORT || 3001;
 
 app.get(
-	'/',
-	async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-		try {
-			res.status(200).json({
-				message: "Hello there!",
-				success: true,
-			});
-		} catch (err: unknown) {
-			next(new Error((err as Error).message));
-		}
-	},
+  '/',
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      res.status(200).json({
+        message: "Hello there!",
+        success: true,
+      });
+    } catch (err: unknown) {
+      next(new Error((err as Error).message));
+    }
+  },
 );
 
 app.listen(port, () => {
-	console.log(`Up and running on port ${port}`);
+  console.log(`Up and running on port ${port}`);
 });
 

@@ -66,6 +66,18 @@ jobs:
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend
 
+      - name: Build & push microservice
+        uses: docker/build-push-action@v7
+        with:
+          context: ./microservice
+          platforms: linux/amd64
+          push: ${{ github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch' }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ steps.image_repo.outputs.repo }}/microservice:latest
+            ${{ env.REGISTRY }}/${{ steps.image_repo.outputs.repo }}/microservice:${{ github.sha }}
+          cache-from: type=gha,scope=microservice
+          cache-to: type=gha,mode=max,scope=microservice
+
   deploy:
     needs: build-and-push
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
