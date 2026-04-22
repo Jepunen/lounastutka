@@ -40,18 +40,36 @@ export async function parseWebsiteToDatabaseBasedOnURL(restaurantUrl: string): P
 
   if (!res.ok) throw new AppError("Site parsing failed", 500);
   const data: any = await res.json();
-  if (!data) throw new AppError("Data could not be fetched", 400);
+
+  // NOTE: This is not a scalable solution but due to budget constraints it is what it is.
+  if (!data || typeof data !== "object") {
+    throw new AppError("Invalid restaurant data.", 400);
+  }
+  if (!data.name) {
+    throw new AppError("Restaurant name is missing.", 400);
+  }
+  if (!data.address || !(data.address.length > 0)) {
+    throw new AppError("Restaurant address is missing.", 400);
+  }
+  if (!Array.isArray(data.position) ||
+    data.position.length !== 2 ||
+    typeof data.position[0] !== "number" ||
+    typeof data.position[1] !== "number"
+  ) {
+    throw new AppError("Restaurant coordinates are missing.", 400);
+  }
+
 
   // We want to format the data here for the database helpers to separate concerns
   // Separate to the different models 
   const msFormat: MicroserviceDataResponse = {
     type: data.type ?? "restaurant",
-    position: Array.isArray(data.position) ? data.position : [null, null],
-    name: data.name ?? "Unknown",
+    position: data.position,
+    name: data.name,
     category: data.category ?? null,
     stars: typeof data.stars === "number" ? data.stars : null,
     reviews: typeof data.reviews === "number" ? data.reviews : null,
-    address: data.address ?? null,
+    address: data.address,
     description: data.description ?? null,
     todayHours: data.todayHours ?? null,
     lunchTime: data.lunchTime ?? null,
@@ -65,8 +83,8 @@ export async function parseWebsiteToDatabaseBasedOnURL(restaurantUrl: string): P
   const restFormat: RestaurantModel = {
     name: msFormat.name,
     address: msFormat.address,
-    lat: msFormat.position[0] ?? null,
-    lon: msFormat.position[1] ?? null,
+    lat: msFormat.position[0],
+    lon: msFormat.position[1],
     category: msFormat.category,
     description: msFormat.description,
     phone: msFormat.phone,
@@ -85,7 +103,6 @@ export async function parseWebsiteToDatabaseBasedOnURL(restaurantUrl: string): P
   return restaurantId;
 }
 
-// TODO: Database schema based typescript model here, Also we parse the data here for DB
 export async function addRestaurantInformationToDatabase(data: RestaurantModel | any): Promise<number> {
   // It is at this stage we need to ask, when do we want to store the restaurant and when not
   // I think there should be some basic information available from the restaurant for it to be added
@@ -93,7 +110,8 @@ export async function addRestaurantInformationToDatabase(data: RestaurantModel |
   // Then comes the question of dublicates, how should the dublicates be considered?
   // Should you be able to add a new restaurant to address that already has restaurant in it?
   // What about same restaurant but now in lowercase?
-  // For now, we check that the restaurant has name and address
+  // For now, due to time constraints, we check that the restaurant has name, 
+  // address and coordinates (for map pin)
   if (!data || typeof data !== "object") {
     throw new AppError("Invalid restaurant data.", 400);
   }
@@ -103,12 +121,20 @@ export async function addRestaurantInformationToDatabase(data: RestaurantModel |
   if (!data.address || !(data.address.length > 0)) {
     throw new AppError("Restaurant address is missing.", 400);
   }
+  // Sanity check for the coordinates
+  if (!Array.isArray(data.position) ||
+    data.position.length !== 2 ||
+    typeof data.position[0] !== "number" ||
+    typeof data.position[1] !== "number"
+  ) {
+    throw new AppError("Restaurant coordinates are missing.", 400);
+  }
 
   const restFormat: RestaurantModel = {
     name: data.name,
     address: data.address,
-    lat: data.position[0] ?? null,
-    lon: data.position[1] ?? null,
+    lat: data.position[0],
+    lon: data.position[1],
     category: data.category ?? null,
     description: data.description ?? null,
     phone: data.phone ?? null,
@@ -123,3 +149,4 @@ export async function addRestaurantInformationToDatabase(data: RestaurantModel |
 
   return restaurantId;
 }
+
