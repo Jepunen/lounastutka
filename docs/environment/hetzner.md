@@ -25,9 +25,17 @@ The production VPS uses:
 |---|---|
 | Provider | Hetzner Cloud |
 | Server type | `CPX32` |
+| CPU platform | AMD |
+| vCPUs | 4 |
+| Memory | 8 GB |
+| Disk | 160 GB |
+| Maximum monthly price | EUR 18.18 / month |
+| Hourly price | EUR 0.0291 / hour |
 | Role | Single-node production Docker Swarm host |
 | Public networking | Paid IPv4 address |
 | DNS provider | Hetzner DNS |
+
+The CPX32 size gives the deployment enough capacity to run the application services, PostgreSQL, Traefik, monitoring, logging, and Portainer on one VPS while keeping hosting costs predictable.
 
 The server hosts the full production stack:
 
@@ -250,6 +258,8 @@ The server IP and tokens should never be committed to the repository.
 ## Operational Notes
 
 - The CPX32 server is the single production host.
+- The server has 4 AMD vCPUs, 8 GB memory, and 160 GB disk.
+- The listed server price is max. EUR 18.18 per month or EUR 0.0291 per hour.
 - The public IPv4 address is paid separately and used for DNS records.
 - DNS for the external domain is managed in Hetzner DNS.
 - Traefik uses Hetzner DNS to create and renew Let's Encrypt certificates.
