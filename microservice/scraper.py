@@ -75,14 +75,14 @@ def scrape_aalef():
         "todayMenu": menu_items[:5],
     }
 
-    def random_lappeenranta_coords():
-        center_lat = 61.058
-        center_lon = 28.188
+def random_lappeenranta_coords():
+    center_lat = 61.058
+    center_lon = 28.188
 
-        return [
-            round(random.gauss(center_lat, 0.02), 6),
-            round(random.gauss(center_lon, 0.03), 6),
-        ]
+    return [
+        round(random.gauss(center_lat, 0.02), 6),
+        round(random.gauss(center_lon, 0.03), 6),
+    ]
 
 @app.post("/scrape")
 def scrape(request: ScrapeRequest):
