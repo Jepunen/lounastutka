@@ -1,63 +1,13 @@
 import requests
 from bs4 import BeautifulSoup
 import re
+import random
+import requests
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
 
 app = FastAPI()
-
-# scraper code
-"""
-def geocode_address(address):
-    url = "https://nominatim.openstreetmap.org/search"
-    params = {"q": address, "format": "json", "limit": 1}
-    headers = {"User-Agent": "lounastutka"}
-
-    res = requests.get(url, params=params, headers=headers)
-    data = res.json()
-
-    if data:
-        return {"lat": data[0]["lat"], "lon": data[0]["lon"]}
-    return None
-
-
-def scrape(url):
-    res = requests.get(url)
-    soup = BeautifulSoup(res.text, "lxml")
-
-    results = []
-
-    for div in soup.find_all("div"):
-        text = div.get_text("\n").strip()
-        lines = [l.strip() for l in text.split("\n") if l.strip()]
-
-        if len(lines) < 3:
-            continue
-
-        name = lines[0]
-        menu = []
-        address = None
-
-        for line in lines:
-            if re.search(r"\d+[,.]?\d*\s?€", line):
-                menu.append({"name": line})
-
-            if "katu" in line.lower():
-                address = line
-
-        if menu:
-            coords = geocode_address(address) if address else None
-
-            results.append({
-                "name": name,
-                "address": address,
-                "coordinates": coords,
-                "menu": menu
-            })
-
-    return results
-"""
 
 class ScrapeRequest(BaseModel):
     urls: str
@@ -65,6 +15,47 @@ class ScrapeRequest(BaseModel):
 
 # Mock restaurant data
 def get_mock_restaurant():
+    names = ["Ravintola Testi", "Lounas Kulma", "Food Place", "Cafe Random"]
+    foods = ["Chicken pasta", "Salmon soup", "Beef stew", "Veggie bowl", "Pizza"]
+    
+    return {
+        "id": random.randint(1, 100000),
+        "type": "restaurant",
+        "position": random_lappeenranta_coords(),
+        "name": random.choice(names),
+        "category": "Ravintola",
+        "stars": round(random.uniform(3.5, 5.0), 1),
+        "reviews": random.randint(10, 300),
+        "address": "Random street 1",
+        "description": "A nice restaurant",
+        "todayHours": "10:00-15:00",
+        "lunchTime": "11:00-14:00",
+        "priceLevel": f"Lunch {random.randint(10, 15)} EUR",
+        "phone": "0456767676",
+        "website": "https://example.fi",
+        "tags": ["lunch", "random"],
+        "todayMenu": random.sample(foods, k=3),
+    }
+
+# scraper code for one site
+# DOESNT WORK YET
+def scrape_aalef():
+    url = "https://www.aalef.fi/#ravintolat"
+
+    res = requests.get(url)
+    soup = BeautifulSoup(res.text, "lxml")
+
+    menu_items = []
+
+    for li in soup.find_all("li"):
+        text = li.get_text(strip=True)
+        if len(text) > 3:
+            menu_items.append(text)
+
+    if not menu_items:
+        # fallback if parsing fails
+        menu_items = ["Chicken pasta", "Salad", "Soup"]
+
     return {
         "id": 1,
         "type": "restaurant",
@@ -74,34 +65,33 @@ def get_mock_restaurant():
         "stars": 4.9,
         "reviews": 120,
         "address": "Villimiehenkatu 1",
-        "description": "something",
+        "description": "Aalef lunch restaurant",
         "todayHours": "10:00-15:00",
         "lunchTime": "11:00-14:00",
         "priceLevel": "Lunch 12 EUR",
         "phone": "9999",
-        "website": "https://example.fi",
-        "tags": ["something", "test", "vegetarian"],
-        "todayMenu": ["Salmon", "bread", "soup"],
+        "website": url,
+        "tags": ["lunch", "aalef"],
+        "todayMenu": menu_items[:5],
     }
 
+    def random_lappeenranta_coords():
+        center_lat = 61.058
+        center_lon = 28.188
+
+        return [
+            round(random.gauss(center_lat, 0.02), 6),
+            round(random.gauss(center_lon, 0.03), 6),
+        ]
 
 @app.post("/scrape")
 def scrape(request: ScrapeRequest):
+    url = request.url.lower()
+
+    if "aalef.fi" in url:
+        return scrape_aalef()
 
     return get_mock_restaurant()
-
-    """def scrape_urls(payload: dict):
-    urls = payload.get("urls", [])
-    all_results = []
-
-    for url in urls:
-        try:
-            data = scrape(url)
-            all_results.extend(data)
-        except Exception as e:
-            print("Error:", e)
-
-    return all_results"""
 
 
 @app.get("/health")
