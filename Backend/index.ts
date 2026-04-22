@@ -9,6 +9,7 @@ import errorHandler from "./middleware/error.middleware.ts";
 // NOTE: Add routes from "routes/" here:
 import authorizationRoutes from "./routes/auth.routes";
 import protectedRoutes from "./routes/protected.routes.ts";
+import restaurantRoutes from "./routes/restaurant.routes.ts";
 
 const app: Express = express();
 
@@ -26,6 +27,7 @@ app.use(cors());
 // When unsure, use ALL...
 app.use("/api/auth", authorizationRoutes);
 app.use("/api/protected", protectedRoutes);
+app.use("/api/restaurant", restaurantRoutes);
 
 // NOTE: Should be included to "use" as last
 app.use(errorHandler);
