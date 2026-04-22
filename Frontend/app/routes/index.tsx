@@ -1,21 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { motion } from "framer-motion";
 import { useMemo, useRef, useState } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
 import { MapBoundsTracker, MapSelectionFocus, SetViewOnClick, UserLocationControl } from "~/components/map/MapBehavior";
-import { IoChevronBackSharp, IoChevronForwardSharp } from "react-icons/io5";
 import MobileRestaurantSheet from "~/components/MobileRestaurantSheet";
 import MapPinMarker from "~/components/MapPin";
-import RestaurantCard from "~/components/RestaurantCard";
-import { places, type Place } from "~/data/places";
+import SideBar from "~/components/SideBar";
+import { places, type Place, type PlaceWithDistance } from "~/data/places";
 import SearchBar from "~/components/SearchBar";
 import { calculateDistanceMeters, formatDistance } from "~/utils/distance";
 import { useUserLocation } from "~/components/UserLocationProvider";
-
-type PlaceWithDistance = Place & {
-  distanceMeters?: number;
-  distanceLabel?: string;
-};
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -54,8 +47,6 @@ function Home() {
     () => (restaurantSelected ? placesWithDistance.find((place) => place.id === restaurantSelected.id) ?? restaurantSelected : null),
     [placesWithDistance, restaurantSelected],
   );
-
-  const orderedVisiblePlaces = visiblePlacesWithDistance;
 
   return (
     <div className="relative min-h-dvh w-full overflow-hidden">
@@ -97,39 +88,13 @@ function Home() {
         onClose={() => setRestaurantSelected(null)}
       />
 
-      <div
-        className={`absolute z-1000 top-0 right-0 h-full hidden md:flex flex-col transition-all duration-300 bg-linear-to-r from-transparent from-0% via-neutral/70 via-30% to-neutral to-60% ${sidebarOpen ? "w-100" : "w-10"
-          }`}
-      >
-        <button
-          onClick={() => setSidebarOpen((o) => !o)}
-          className="flex items-center justify-center h-9 w-9 shrink-0 bg-white text-dark shadow-md rounded-full hover:bg-gray transition-colors mt-20 ml-1"
-        >
-          {sidebarOpen ? <IoChevronForwardSharp /> : <IoChevronBackSharp />}
-        </button>
-
-        {sidebarOpen && (
-          <motion.div layout className="overflow-y-auto flex flex-col gap-3 pb-24 px-3 pt-2">
-            {orderedVisiblePlaces.map((p) => (
-              <motion.div
-                key={p.id}
-                layout
-                initial={false}
-                transition={{ type: "spring", stiffness: 420, damping: 34, mass: 0.75 }}
-              >
-                <RestaurantCard
-                  restaurant={p}
-                  isExpanded={restaurantSelected?.id === p.id}
-                  onToggleMoreInfo={() => {
-                    setRestaurantSelected((current) => (current?.id === p.id ? null : p));
-                  }}
-                />
-              </motion.div>
-            ))
-            }
-          </motion.div>
-        )}
-      </div>
+      <SideBar
+        isOpen={sidebarOpen}
+        onToggleOpen={() => setSidebarOpen((open) => !open)}
+        visiblePlaces={visiblePlacesWithDistance}
+        restaurantSelected={restaurantSelected}
+        onSelectRestaurant={setRestaurantSelected}
+      />
     </div>
   );
 }
