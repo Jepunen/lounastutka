@@ -13,6 +13,7 @@ export interface MobileRestaurantSheetRestaurant {
     category: string;
     stars: number;
     reviews: number;
+    distanceLabel?: string;
     address?: string;
     description?: string;
     todayHours?: string;
@@ -41,14 +42,21 @@ const MobileRestaurantSheet = ({ restaurant, onClose }: MobileRestaurantSheetPro
                     exit={{ y: -16, opacity: 0 }}
                     transition={{ type: "spring", stiffness: 260, damping: 28 }}
                     data-mobile-restaurant-sheet
-                    className="fixed inset-x-0 top-0 z-[1000] flex h-[calc(52dvh)] min-h-[18rem] flex-col md:hidden pointer-events-none px-3 pt-[5.5rem] pb-4">
+                    className="fixed inset-x-0 top-0 z-1000 flex h-[calc(52dvh)] min-h-72 flex-col md:hidden pointer-events-none px-3 pt-22 pb-4">
                     <div className="pointer-events-auto flex h-full flex-col overflow-hidden rounded-3xl border border-dark/10 bg-linear-to-b from-neutral/98 via-neutral/96 to-neutral/92 shadow-2xl backdrop-blur-sm">
                         <div className="flex items-start justify-between gap-3 border-b border-dark/10 px-4 py-3">
                             <div className="min-w-0">
                                 <div className="truncate text-sm font-semibold tracking-wide text-secondary">Restaurant details</div>
                                 <div className="truncate text-lg font-bold leading-tight text-dark">{restaurant.name}</div>
                                 <div className="text-sm text-dark/70">{restaurant.category}</div>
+
                             </div>
+                            {restaurant.distanceLabel && (
+                                <div className="mt-1 flex items-center gap-1 text-xl font-semibold text-primary">
+                                    <IoLocationOutline className="text-base" />
+                                    <span>{restaurant.distanceLabel}</span>
+                                </div>
+                            )}
                             <button
                                 type="button"
                                 onClick={onClose}
