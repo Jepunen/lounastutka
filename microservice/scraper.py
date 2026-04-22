@@ -21,10 +21,7 @@ def get_mock_restaurant():
     return {
         "id": random.randint(1, 100000),
         "type": "restaurant",
-        "position": [
-            61.05 + random.uniform(-0.02, 0.02),
-            28.19 + random.uniform(-0.02, 0.02)
-        ],
+        "position": random_lappeenranta_coords(),
         "name": random.choice(names),
         "category": "Ravintola",
         "stars": round(random.uniform(3.5, 5.0), 1),
@@ -41,6 +38,7 @@ def get_mock_restaurant():
     }
 
 # scraper code for one site
+# DOESNT WORK YET
 def scrape_aalef():
     url = "https://www.aalef.fi/#ravintolat"
 
@@ -77,6 +75,14 @@ def scrape_aalef():
         "todayMenu": menu_items[:5],
     }
 
+    def random_lappeenranta_coords():
+        center_lat = 61.058
+        center_lon = 28.188
+
+        return [
+            round(random.gauss(center_lat, 0.02), 6),
+            round(random.gauss(center_lon, 0.03), 6),
+        ]
 
 @app.post("/scrape")
 def scrape(request: ScrapeRequest):
