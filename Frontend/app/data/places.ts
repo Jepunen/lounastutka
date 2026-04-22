@@ -17,6 +17,11 @@ export type Place = {
   todayMenu?: string[];
 };
 
+export type PlaceWithDistance = Place & {
+  distanceMeters?: number;
+  distanceLabel?: string;
+};
+
 export const places: Place[] = [
   {
     id: 1,
