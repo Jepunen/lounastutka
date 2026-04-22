@@ -84,7 +84,7 @@ and in routes/protected.routes.ts
 
 **database/:** Acts as API to the database service, containing the database schema based typescript models and including the methods that make the database SQL queries via bun.js SQL library. It also has the connection initialization and its usage should be as easy as importing it to a service file and using e.g. `await db.findUserByID(...)`. 
 
-**middlewares/:** This folder includes all of the custom middleware methods such as email & password verification and token verification.
+**middlewares/:** This folder includes all of the custom middleware methods such as email & password verification and token verification and custom error handler for express.
 
 
 #### API Documentation
@@ -92,10 +92,10 @@ and in routes/protected.routes.ts
 The API documentation is built from the developer written `typedoc` [style](https://typedoc.org/) code comments and typedoc parsed method declarations. The documentation index.html can be created with:
 
 ```bash
-[Backend]$ bun run typedoc EntryStrategy Expand routes/* controllers/* middleware/* 
+[Backend]$ bun run typedoc --entryPointStrategy Expand routes/* controllers/* middleware/* 
 ```
 
-, this should create the new files under `Backend/docs/` folder. 
+, this should create the new html files under `Backend/docs/` folder. 
 
 **NOTE:** For better documentation, strong typing is recommended as typedoc can and will complain if there are 'any' types around.
 
@@ -103,6 +103,7 @@ The API documentation is built from the developer written `typedoc` [style](http
 #### Error handling
 
 Currently there exists only the generic error handling code that shows the end-user generic error code rather than showing the full stack from backend as it could potentially contain protected information and in the end wouldn't help a normal user. This relies on the fact that when developing and using error messages, it is important to differentiate what types of errors the user should see and what should remain under the maintainers logs, e.g. 4xx codes vs 5xx codes. 
+
 
 **NOTE:** This project was created using `bun init` in bun v1.3.10. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
 
