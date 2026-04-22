@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 @font-face {
-	font-family: "Kreon";
-	src: url("/fonts/Kreon/Kreon-VariableFont_wght.ttf") format("ttf");
-	font-weight: 300 700;
-	font-display: swap;
+  font-family: "Kreon";
+  src: url("/fonts/Kreon/Kreon-VariableFont_wght.ttf") format("ttf");
+  font-weight: 300 700;
+  font-display: swap;
 }
 
 @theme {
@@ -13,10 +13,11 @@
   --color-tertiary: #ffc300;
   --color-neutral: #f8f9fa;
   --color-dark: #1b1b1b;
-  --color-gray: #E0E3E4;
+  --color-gray: #e0e3e4;
 
-  --font-sans: "Kreon", ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans:
+    "Kreon", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 html,
@@ -27,4 +28,30 @@ body {
 .leaflet-container {
   width: 100%;
   height: 100vh;
+}
+
+.leaflet-control-attribution {
+  background: rgba(248, 249, 250, 0.9) !important;
+  color: rgba(27, 27, 27, 0.8) !important;
+  font-size: 0.65rem;
+  line-height: 1.2;
+  padding: 0.25rem 0.1rem;
+  border-radius: 0 0.5rem 0 0;
+}
+
+.leaflet-bottom.leaflet-right {
+  left: 0.5rem;
+  right: auto;
+  z-index: 900;
+}
+
+@media (max-width: 767px) {
+  .leaflet-bottom.leaflet-right {
+    bottom: 1rem;
+  }
+
+  .leaflet-control-attribution {
+    max-width: min(16rem, calc(100vw - 1rem));
+    text-wrap: balance;
+  }
 }
