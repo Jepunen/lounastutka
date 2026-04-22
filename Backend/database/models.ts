@@ -80,3 +80,10 @@ export type MenuItemModel = {
   name: string;
 };
 
+// The return type for getting all restaurant menu data.
+export type RawMenuDataModel = {
+  id: number;
+  restaurantId: number;
+  menuId: number;
+  name: string;
+};

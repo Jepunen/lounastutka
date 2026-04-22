@@ -3,7 +3,8 @@ import type {
   UserModel,
   PasskeyModel,
   RestaurantModel,
-  MenuItemModel
+  MenuItemModel,
+  RawMenuDataModel
 } from "./models.ts"
 
 // src: https://bun.com/docs/runtime/sql
@@ -189,9 +190,15 @@ export default {
 
     return restaurantRes[0].id;
   },
+
   async removeRestaurant(restId: number): Promise<number | null> {
     const res = await pg`DELETE FROM app.restaurants WHERE id = ${restId}`;
     return res.length > 0 ? res[0].id : null;
+  },
+
+  async getAllRestaurants(): Promise<RestaurantModel[]> {
+    const res = await pg`SELECT * FROM app.restaurants ORDER BY id`;
+    return res as RestaurantModel[];
   },
 
   // NOTE: Verifying the restId is on the hands of caller. 
@@ -233,4 +240,29 @@ export default {
       name: menuitem.name
     }));
   },
+
+  // Well, with around 17000 potential entries within Finland: 
+  //  https://www.mara.fi/toimiala/tilastot/yritysten-ja-tyollisten-maara/ravintolayritysten-maara.html, 
+  //  we might need this dedicated DB query for this route, not entirely sure this fixes it thought.
+  async getAllRestaurantsMenus(): Promise<RawMenuDataModel[]> {
+    // NOTE: Use type defined under models.ts, as the query responds with the columns 
+    // set to the alias names and we need to define the typescript type for service
+    const res = await pg`
+      SELECT 
+        m.fk_restaurant AS restaurant_id,
+        mi.id AS id,
+        mi.fk_menu as menu_id,
+        mi.name AS name
+      FROM app.menu_items mi
+      JOIN app.menus m ON mi.fk_menu = m.id
+      ORDER BY m.fk_restaurant, mi.id
+    `;
+
+    return res.map((row: any) => ({
+      id: row.id,
+      restaurantId: row.restaurant_id,
+      menuId: row.menu_id,
+      name: row.name,
+    }));
+  }
 }
