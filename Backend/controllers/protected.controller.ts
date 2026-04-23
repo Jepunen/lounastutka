@@ -2,6 +2,7 @@ import type { Response, NextFunction } from "express";
 import type { AuthenticatedRequest } from "../middleware/auth.middleware";
 import { AppError } from "../utils/error.ts";
 import {
+  previewRestaurantFromUrl,
   parseWebsiteToDatabaseBasedOnURL,
   addRestaurantInformationToDatabase
 } from "../services/protected.service.ts";
@@ -41,6 +42,19 @@ export async function helloThere(req: AuthenticatedRequest, res: Response) {
  * @throws AppError if `restaurantUrl` is missing or invalid
  * @throws AppError if parsing or database insertion fails
  */
+export async function previewFromSite(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  try {
+    const { restaurantUrl } = req.body;
+    if (!restaurantUrl || typeof restaurantUrl !== "string") {
+      throw new AppError("restaurantUrl is required.", 400);
+    }
+    const data = await previewRestaurantFromUrl(restaurantUrl);
+    res.status(200).json(data);
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function parseFromSite(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   // TODO: We need to somehow parse the url against injections to the microservice.
   try {

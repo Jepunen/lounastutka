@@ -5,7 +5,8 @@ import { MapBoundsTracker, MapSelectionFocus, SetViewOnClick, UserLocationContro
 import MobileRestaurantSheet from "~/components/MobileRestaurantSheet";
 import MapPinMarker from "~/components/MapPin";
 import SideBar from "~/components/SideBar";
-import { places, type Place, type PlaceWithDistance } from "~/data/places";
+import { usePlaces } from "~/hooks/usePlaces";
+import type { Place, PlaceWithDistance } from "~/data/places";
 import SearchBar from "~/components/SearchBar";
 import { calculateDistanceMeters, formatDistance } from "~/utils/distance";
 import { useUserLocation } from "~/components/UserLocationProvider";
@@ -21,6 +22,7 @@ function Home() {
   const [visiblePlaces, setVisiblePlaces] = useState<Place[]>([]);
   const [searchValue, setSearchValue] = useState("");
   const { position: userPosition } = useUserLocation();
+  const { places } = usePlaces();
 
   const placesWithDistance = useMemo<PlaceWithDistance[]>(
     () =>
@@ -29,7 +31,7 @@ function Home() {
         distanceMeters: userPosition ? calculateDistanceMeters(userPosition, place.position) : undefined,
         distanceLabel: userPosition ? formatDistance(calculateDistanceMeters(userPosition, place.position)) : undefined,
       })),
-    [userPosition],
+    [userPosition, places],
   );
 
   const visiblePlacesWithDistance = useMemo<PlaceWithDistance[]>(

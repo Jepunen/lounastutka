@@ -20,7 +20,7 @@
  */
 
 import { authenticateToken } from "../middleware/auth.middleware.ts";
-import { helloThere, parseFromSite, addRestaurantInfo } from "../controllers/protected.controller.ts";
+import { helloThere, previewFromSite, parseFromSite, addRestaurantInfo } from "../controllers/protected.controller.ts";
 import { Router } from "express";
 
 const router: Router = Router();
@@ -43,6 +43,7 @@ router.get("/hello-there", authenticateToken, helloThere);
  * @returns Parsed restaurant data from the external source
  * @throws AppError if parsing fails or URL is invalid
  */
+router.post("/preview-from-site", authenticateToken, previewFromSite);
 router.post("/parse-from-site", authenticateToken, parseFromSite);
 
 /**

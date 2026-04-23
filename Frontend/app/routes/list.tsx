@@ -3,7 +3,8 @@ import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { IoRestaurantOutline, IoPizzaOutline, IoLeafOutline, IoSearchOutline } from "react-icons/io5";
 import RestaurantCard from "~/components/RestaurantCard";
-import { places, type Place } from "~/data/places";
+import { type Place } from "~/data/places";
+import { usePlaces } from "~/hooks/usePlaces";
 import { calculateDistanceMeters, formatDistance } from "~/utils/distance";
 import { useUserLocation } from "~/components/UserLocationProvider";
 
@@ -28,6 +29,7 @@ function ListView() {
   const [activeType, setActiveType] = useState<Place["type"] | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const { position: userPosition } = useUserLocation();
+  const { places } = usePlaces();
 
   const filtered = useMemo<PlaceWithDistance[]>(() => {
     const q = search.toLowerCase();
@@ -49,7 +51,7 @@ function ListView() {
         distanceLabel: userPosition ? formatDistance(calculateDistanceMeters(userPosition, place.position)) : undefined,
       }))
       .sort((left, right) => (left.distanceMeters ?? Number.POSITIVE_INFINITY) - (right.distanceMeters ?? Number.POSITIVE_INFINITY));
-  }, [activeType, search, userPosition]);
+  }, [activeType, search, userPosition, places]);
 
   return (
     <div className="min-h-dvh bg-neutral flex flex-col items-center">

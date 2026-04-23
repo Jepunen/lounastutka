@@ -15,7 +15,7 @@ const fieldAnim = {
   transition: { duration: 0.2 },
 };
 
-export default function AuthForm() {
+export default function AuthForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   // Sign in state
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -38,7 +38,7 @@ export default function AuthForm() {
     loginWithWebauth,
     registerWithPW,
     registerWithWebauth
-  } = useAuth();
+  } = useAuth(onSuccess);
 
   // Helpers for the authentication 
   async function handleLogin() {

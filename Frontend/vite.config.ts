@@ -8,6 +8,14 @@ export default defineConfig({
     routesDirectory: "./app/routes",
     generatedRouteTree: "./app/routeTree.gen.ts",
   }), tsconfigPaths()],
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://backend:3001",
+        changeOrigin: true,
+      },
+    },
+  },
   build: {
     outDir: "build/client",
   },
