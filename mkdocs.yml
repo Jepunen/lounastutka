@@ -12,6 +12,24 @@ nav:
     - Deployment: architecture/deployment.md
     - Data flow: architecture/dataflow.md
     - Use-case: architecture/usecase.md
+  - Environment:
+    - Platform:
+      - Hetzner: environment/hetzner.md
+      - Docker: environment/docker.md
+    - Deployment:
+      - GitHub Actions: environment/github-actions.md
+    - Routing:
+      - Traefik: environment/traefik.md
+      - Nginx: environment/nginx.md
+    - Data:
+      - PostgreSQL: environment/postgre.md
+    - Observability:
+      - Prometheus: environment/prometheus.md
+      - Grafana: environment/grafana.md
+      - Loki: environment/loki.md
+      - Promtail: environment/promtail.md
+    - Management:
+      - Portainer: environment/portainer.md
 
 watch:
   - mkdocs.yml
@@ -26,4 +44,3 @@ markdown_extensions:
   - attr_list
   - md_in_html
   - pymdownx.blocks.caption
-
