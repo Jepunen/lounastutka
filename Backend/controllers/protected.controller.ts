@@ -25,6 +25,38 @@ export async function helloThere(req: AuthenticatedRequest, res: Response) {
 }
 
 /**
+ * Parses restaurant data from an external website and returns it for preview
+ * before saving it to a database.
+ *
+ * @remarks
+ * Route POST /api/protected/preview-from-site
+ *
+ * This route is protected and requires a valid JWT.
+ *
+ * The provided URL is forwarded to a microservice that extracts restaurant
+ * information. The data is then returned as is to the frontend.
+ *
+ *
+ * @param req.body.restaurantUrl: URL of the restaurant page to parse
+ * @returns The parsed restaurant data.
+ *
+ * @throws AppError if `restaurantUrl` is missing or invalid
+ * @throws AppError if parsing fails
+ */
+export async function previewFromSite(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  try {
+    const { restaurantUrl } = req.body;
+    if (!restaurantUrl || typeof restaurantUrl !== "string") {
+      throw new AppError("restaurantUrl is required.", 400);
+    }
+    const data = await previewRestaurantFromUrl(restaurantUrl);
+    res.status(200).json(data);
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
  * Parses restaurant data from an external website and stores it in the database.
  *
  * @remarks
@@ -42,19 +74,6 @@ export async function helloThere(req: AuthenticatedRequest, res: Response) {
  * @throws AppError if `restaurantUrl` is missing or invalid
  * @throws AppError if parsing or database insertion fails
  */
-export async function previewFromSite(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  try {
-    const { restaurantUrl } = req.body;
-    if (!restaurantUrl || typeof restaurantUrl !== "string") {
-      throw new AppError("restaurantUrl is required.", 400);
-    }
-    const data = await previewRestaurantFromUrl(restaurantUrl);
-    res.status(200).json(data);
-  } catch (error) {
-    next(error);
-  }
-}
-
 export async function parseFromSite(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   // TODO: We need to somehow parse the url against injections to the microservice.
   try {
