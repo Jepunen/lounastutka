@@ -8,8 +8,17 @@ import type {
 } from "./models.ts"
 
 // src: https://bun.com/docs/runtime/sql
-const pg = new SQL(
-  process.env.POSTGRES_URL || "postgres://lounastutka:changeme@db:5432/lounastutka");
+// Issue found in production with connection timeout, 
+//  most likely cause: https://github.com/oven-sh/bun/issues/16691
+// Setting the timeouts is not a fix for production but used as 
+// workaround for this version due to time constraints.
+const pg = new SQL({
+  url: process.env.POSTGRES_URL || "postgres://lounastutka:changeme@db:5432/lounastutka",
+  idleTimeout: 3600,
+  connectionTimeout: 3600,
+  maxLifetime: 16000,
+  max: 20,
+});
 
 // Helper for translating postgres to typescript format for user
 function mapUser(row: Record<string, unknown>): UserModel {
