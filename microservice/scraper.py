@@ -86,7 +86,7 @@ def random_lappeenranta_coords():
 
 @app.post("/scrape")
 def scrape(request: ScrapeRequest):
-    url = request.url.lower()
+    url = request.urls.lower()
 
     if "aalef.fi" in url:
         return scrape_aalef()

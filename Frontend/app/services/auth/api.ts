@@ -21,6 +21,17 @@ export function clearJWTToken() {
 	localStorage.removeItem("jwt");
 }
 
+export function getJWTEmail(): string | null {
+	const token = getStoredJWTToken();
+	if (!token) return null;
+	try {
+		const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+		return payload.email ?? null;
+	} catch {
+		return null;
+	}
+}
+
 // GET method helper
 export async function getJSON<T>(path: string): Promise<T> {
 	return requestJSON<T>(`/api${path}`, {

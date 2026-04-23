@@ -23,6 +23,22 @@ type MicroserviceDataResponse = {
   todayMenu: string[];
 };
 
+// Call the microservice and return the parsed data without saving it.
+export async function previewRestaurantFromUrl(restaurantUrl: string): Promise<MicroserviceDataResponse> {
+  const microserviceUrl = process.env.MICROSERVICE_URL ?? "http://microservice:8100/scrape";
+  const res = await fetch(microserviceUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ urls: restaurantUrl }),
+  });
+  if (!res.ok) throw new AppError("Site parsing failed", 500);
+  const data: any = await res.json();
+  if (!data || typeof data !== "object" || !data.name) {
+    throw new AppError("Invalid data from microservice.", 400);
+  }
+  return data as MicroserviceDataResponse;
+}
+
 // Call the Microservice for parsing the website based on the given URL
 // then store the information to the database if its valid.
 export async function parseWebsiteToDatabaseBasedOnURL(restaurantUrl: string): Promise<number> {
@@ -146,6 +162,12 @@ export async function addRestaurantInformationToDatabase(data: RestaurantModel |
 
   const restaurantId = await db.addRestaurantData(restFormat);
   if (!restaurantId) throw new AppError("Could not add restaurant.", 400);
+
+  const menuItems: string[] = Array.isArray(data.todayMenu) ? data.todayMenu.filter(Boolean) : [];
+  if (menuItems.length > 0) {
+    const menuId = await db.addMenuToRestaurant(restaurantId, menuItems);
+    if (!menuId) throw new AppError("Could not add menu for restaurant.", 400);
+  }
 
   return restaurantId;
 }
