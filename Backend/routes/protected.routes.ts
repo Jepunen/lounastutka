@@ -37,13 +37,23 @@ router.get("/hello-there", authenticateToken, helloThere);
 /**
  * Parses restaurant data from an external website.
  *
- * @route POST /parse-from-site
+ * @route POST /preview-from-site
  * @middleware authenticateToken
  * @param req.body.restaurantUrl: The URL to parse restaurant data from
  * @returns Parsed restaurant data from the external source
  * @throws AppError if parsing fails or URL is invalid
  */
 router.post("/preview-from-site", authenticateToken, previewFromSite);
+
+/**
+ * Parses restaurant data from an external website.
+ *
+ * @route POST /parse-from-site
+ * @middleware authenticateToken
+ * @param req.body.restaurantUrl: The URL to parse restaurant data from
+ * @returns message about the success status
+ * @throws AppError if parsing fails or URL is invalid
+ */
 router.post("/parse-from-site", authenticateToken, parseFromSite);
 
 /**
