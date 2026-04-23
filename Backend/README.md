@@ -36,12 +36,14 @@ The backend is divided to the following structure:
 
 
 ```bash
-[Backend]$ tree -I node_modules
+[Backend]$ tree -I node_modules -I docs
 .
 ├── bun.lock
 ├── controllers
 │   ├── auth.controller.ts
-│   └── protected.controller.ts
+│   ├── protected.controller.ts
+│   ├── restaurant.controller.ts
+│   └── types.ts
 ├── database
 │   ├── helpers.ts
 │   └── models.ts
@@ -50,15 +52,18 @@ The backend is divided to the following structure:
 ├── middleware
 │   ├── auth.middleware.ts
 │   ├── auth.validator.ts
+│   ├── error.middleware.ts
 │   └── validator.ts
 ├── package.json
 ├── README.md
 ├── routes
 │   ├── auth.routes.ts
-│   └── protected.routes.ts
+│   ├── protected.routes.ts
+│   └── restaurant.routes.ts
 ├── services
 │   ├── auth.service.ts
-│   └── protected.service.ts
+│   ├── protected.service.ts
+│   └── restaurant.service.ts
 ├── tsconfig.json
 └── utils
     └── error.ts

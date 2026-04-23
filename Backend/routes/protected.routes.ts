@@ -13,7 +13,8 @@
  *
  * Controllers:
  * - `helloThere`: simple authenticated test endpoint
- * - `parseFromSite`: parses restaurant data from a given URL
+ * - `previewFromSite`: parses restaurant data from a given URL and responds with the data
+ * - `parseFromSite`: parses restaurant data from a given URL and stores it to database
  * - `addRestaurantInfo`: manually inserts restaurant data into the database
  *
  * @packageDocumentation
@@ -27,43 +28,21 @@ const router: Router = Router();
 
 /**
  * Test endpoint to verify authentication.
- *
- * @route GET /hello-there
- * @middleware authenticateToken
- * @returns A simple JSON message confirming authentication
  */
 router.get("/hello-there", authenticateToken, helloThere);
 
 /**
- * Parses restaurant data from an external website.
- *
- * @route POST /preview-from-site
- * @middleware authenticateToken
- * @param req.body.restaurantUrl: The URL to parse restaurant data from
- * @returns Parsed restaurant data from the external source
- * @throws AppError if parsing fails or URL is invalid
+ * Parses restaurant data from an external website and returns the data.
  */
 router.post("/preview-from-site", authenticateToken, previewFromSite);
 
 /**
- * Parses restaurant data from an external website.
- *
- * @route POST /parse-from-site
- * @middleware authenticateToken
- * @param req.body.restaurantUrl: The URL to parse restaurant data from
- * @returns message about the success status
- * @throws AppError if parsing fails or URL is invalid
+ * Parses restaurant data from an external website and stores the data.
  */
 router.post("/parse-from-site", authenticateToken, parseFromSite);
 
 /**
  * Adds restaurant information manually to the database.
- *
- * @route POST /add-restaurant-information
- * @middleware authenticateToken
- * @param req.body: Restaurant data fields
- * @returns Confirmation of successful insertion
- * @throws AppError if validation or database insertion fails
  */
 router.post("/add-restaurant-information", authenticateToken, addRestaurantInfo);
 
