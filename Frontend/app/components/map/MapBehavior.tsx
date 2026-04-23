@@ -7,6 +7,12 @@ import { IoLocateOutline } from "react-icons/io5";
 import { useUserLocation } from "~/components/UserLocationProvider";
 import type { UserPosition } from "~/components/UserLocationProvider";
 
+
+/* SetViewOnClick
+This function component listens for click events on the map and sets the view to the clicked location. 
+It uses the useMapEvent hook from react-leaflet to listen for click events and updates the map view accordingly. 
+The animateRef is used to determine whether the map should animate the transition to the new view or not.
+*/
 export function SetViewOnClick({
   animateRef,
   onMapClick,
@@ -22,6 +28,12 @@ export function SetViewOnClick({
   return null;
 }
 
+/*
+MapBoundsTracker
+This function component tracks the bounds of the map and calls the onBoundsChange callback with the places that are currently visible within the map bounds. 
+It uses the useMapEvent hook to listen for "moveend" and "zoomend" events, which indicate that the user has finished moving or zooming the map. 
+When these events occur, it checks which places are within the current map bounds and calls the onBoundsChange callback with that list of places.
+*/
 export function MapBoundsTracker({
   places,
   onBoundsChange,
@@ -46,6 +58,14 @@ export function MapBoundsTracker({
   return null;
 }
 
+/*
+MapSelectionFocus
+This function component focuses the map view on a selected restaurant. 
+It listens for changes to the restaurant prop and, when a new restaurant is selected, 
+it calculates the appropriate center point for the map view to ensure that the selected restaurant's 
+marker is visible and not obscured by any UI elements (like a mobile sheet or bottom navigation). 
+It also listens for window resize events to adjust the view if necessary when the screen size changes.
+*/
 export function MapSelectionFocus({
   restaurant,
   animateRef,
@@ -60,6 +80,13 @@ export function MapSelectionFocus({
       return;
     }
 
+    /*
+    recenterToVisibleTarget calculates the appropriate center point for the map view to ensure 
+    that the selected restaurant's marker is visible and not obscured by any UI elements. 
+    It takes into account the size of the map, whether the user is on a mobile device, and the 
+    positions of any relevant UI elements (like a mobile sheet or bottom navigation) to determine 
+    where to center the map.
+    */
     const recenterToVisibleTarget = () => {
       const size = map.getSize();
       const isMobile = window.matchMedia("(max-width: 767px)").matches;
@@ -99,6 +126,14 @@ export function MapSelectionFocus({
   return null;
 }
 
+
+/*
+UserLocationControl
+This function component provides a control for the user to center the map on their current location. 
+It uses the useUserLocation hook to access the user's location and related state (like whether the app is currently trying to locate the user or if there was an error). 
+When the user clicks the button, it attempts to locate the user and, if successful, centers the map on their location. 
+It also displays a CircleMarker on the map at the user's location and shows any error messages if locating fails.
+*/
 export function UserLocationControl() {
   const map = useMap();
   const { position, isLocating, errorMessage, locateUser } = useUserLocation();

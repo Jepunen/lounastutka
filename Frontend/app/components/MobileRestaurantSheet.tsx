@@ -1,11 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import {
-    IoCallOutline,
     IoCloseSharp,
-    IoEarthOutline,
-    IoLocationOutline,
-    IoPricetagsOutline,
-    IoTimeOutline,
 } from "react-icons/io5";
 import CardContactSection from "./_RestaurantCard/CardContactSection";
 import CardMenu from "./_RestaurantCard/CardMenu";
@@ -34,6 +29,13 @@ export interface MobileRestaurantSheetProps {
     onClose: () => void;
 }
 
+/*
+MobileRestaurantSheet
+This component is responsible for displaying a detailed view of a restaurant in a mobile-friendly sheet format.
+It uses the AnimatePresence and motion components from framer-motion to animate the appearance and disappearance of the sheet.
+The sheet includes a header with the restaurant's name, category, rating, and distance, as well as sections for the restaurant's description, today's hours, lunch time, price level, menu, and contact information. 
+The onClose callback is triggered when the user clicks the close button, allowing the parent component to control the visibility of the sheet.
+*/
 const MobileRestaurantSheet = ({ restaurant, onClose }: MobileRestaurantSheetProps) => {
     return (
         <AnimatePresence initial={false}>

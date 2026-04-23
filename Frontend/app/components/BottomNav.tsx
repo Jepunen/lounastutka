@@ -7,6 +7,13 @@ const tabs = [
   { label: "Asetukset", icon: IoSettingsOutline, path: "/settings" },
 ] as const;
 
+/*
+BottomNav
+This component renders a bottom navigation bar with three tabs: "Kartta" (Map), "Lista" (List), and "Asetukset" (Settings). 
+It uses the useNavigate and useLocation hooks from react-router to handle navigation between different routes in the application.
+The active tab is determined by comparing the current pathname with the path of each tab, and the active tab is styled differently to indicate that it is selected. 
+When a tab is clicked, the navigate function is called to change the route to the corresponding path.
+*/
 const BottomNav = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -22,9 +29,8 @@ const BottomNav = () => {
             className="flex flex-col items-center gap-1 flex-1 cursor-pointer"
           >
             <span
-              className={`text-2xl p-3 rounded-3xl transition-colors duration-200 ${
-                active ? "bg-primary text-neutral" : "text-dark/60"
-              }`}
+              className={`text-2xl p-3 rounded-3xl transition-colors duration-200 ${active ? "bg-primary text-neutral" : "text-dark/60"
+                }`}
             >
               <Icon />
             </span>

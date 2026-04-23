@@ -2,6 +2,8 @@ import { IoPricetagsOutline, IoTimeOutline } from "react-icons/io5";
 
 
 const CardMetaGrid = ({ description, todayHours, lunchTime, priceLevel, }: { description?: string; todayHours?: string; lunchTime?: string; priceLevel?: string }) => {
+
+  // CardMetaGrid component is responsible for displaying additional information about a restaurant, such as its description, today's opening hours, lunch time, and price level. It organizes this information in a grid layout, making it easy for users to quickly access important details about the restaurant. The component also includes icons to visually represent the type of information being displayed, enhancing the overall user experience.
   return (
     <>
       {description && (

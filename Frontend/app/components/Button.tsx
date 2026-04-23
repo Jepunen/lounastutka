@@ -9,6 +9,13 @@ export interface ButtonProps extends HTMLMotionProps<"button"> {
 
 type VariantType = "primary" | "secondary" | "outline";
 
+/*
+Button
+This component renders a customizable button that can display a loading state. 
+It accepts props for the button's variant (primary, secondary, or outline), whether it is currently loading, and any additional HTML button attributes.
+The button uses framer-motion for smooth animations on hover and tap, and it conditionally renders a loading spinner when the isLoading prop is true. 
+The button is also disabled when it is in the loading state or when the disabled prop is set, preventing user interaction during those times.
+*/
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
     { isLoading = false, children, disabled, type = "button", variant = "primary" as VariantType, className = "", ...rest },
     ref,

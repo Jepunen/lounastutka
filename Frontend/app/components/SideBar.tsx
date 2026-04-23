@@ -12,6 +12,12 @@ type SideBarProps = {
   onSelectRestaurant: (place: Place | null) => void;
 };
 
+/*
+SideBar
+This component renders a sidebar that displays a list of visible restaurants on the map. 
+It includes a toggle button to open and close the sidebar, and when open, it shows a list of RestaurantCard components for each visible restaurant. 
+The sidebar also highlights the selected restaurant and allows the user to select a restaurant by clicking on its card, which triggers the onSelectRestaurant callback to update the selected restaurant in the parent component.
+*/
 const SideBar = ({
   isOpen,
   onToggleOpen,

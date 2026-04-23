@@ -8,6 +8,9 @@ import {
   type RestaurantPreview,
 } from "~/services/protected/restaurant";
 
+// SettingsPage
+// This component renders the settings page of the application. It includes a header with the title "Asetukset" and an AuthForm component for managing user authentication settings. 
+// The page is styled to be responsive and centered, with padding and a maximum width to ensure a good user experience on different screen sizes.
 export const Route = createFileRoute("/settings")({
   component: SettingsPage,
 });

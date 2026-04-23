@@ -8,10 +8,17 @@ import { usePlaces } from "~/hooks/usePlaces";
 import { calculateDistanceMeters, formatDistance } from "~/utils/distance";
 import { useUserLocation } from "~/components/UserLocationProvider";
 
+/*
+ListView
+This component renders a list view of the restaurants. It includes a search bar for filtering restaurants by name, category, or tags, and a set of filter pills for filtering by restaurant type.
+The list of restaurants is sorted by distance from the user's location, and each restaurant is displayed using the RestaurantCard component.
+The component uses the useMemo hook to optimize the filtering and sorting of the restaurant list, ensuring that these operations are only performed when necessary (i.e., when the search query, active type filter, or user location changes).
+*/
 export const Route = createFileRoute("/list")({
   component: ListView,
 });
 
+// type filters for the restaurant list, including an option for all types and specific icons for each type.
 const typeFilters = [
   { label: "Kaikki", value: null },
   { label: "Ravintola", value: "restaurant" as Place["type"], icon: IoRestaurantOutline },
@@ -24,13 +31,18 @@ type PlaceWithDistance = Place & {
   distanceLabel?: string;
 };
 
+// ListView component definition
+// This component renders a list of restaurants with search and filter functionality. It uses the user's location to calculate and display the distance to each restaurant.
 function ListView() {
+
+  // states for managing the search query, active type filter, expanded restaurant card, and user location.
   const [search, setSearch] = useState("");
   const [activeType, setActiveType] = useState<Place["type"] | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const { position: userPosition } = useUserLocation();
   const { places } = usePlaces();
 
+  // filtered is a memoized value that contains the list of restaurants filtered by the search query and active type filter, and sorted by distance from the user's location.
   const filtered = useMemo<PlaceWithDistance[]>(() => {
     const q = search.toLowerCase();
 
@@ -81,8 +93,8 @@ function ListView() {
                 key={label}
                 onClick={() => setActiveType(value)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap border transition-colors duration-150 cursor-pointer ${active
-                    ? "bg-primary text-neutral border-primary"
-                    : "bg-white text-dark/70 border-dark/10 hover:border-dark/20"
+                  ? "bg-primary text-neutral border-primary"
+                  : "bg-white text-dark/70 border-dark/10 hover:border-dark/20"
                   }`}
               >
                 {Icon && <Icon className="text-base" />}

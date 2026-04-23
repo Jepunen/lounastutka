@@ -8,6 +8,13 @@ import { IoLeafOutline } from "react-icons/io5";
 
 type MapPinType = "restaurant" | "pizza" | "vegan";
 
+
+/*
+MapPinVisual
+This function component renders the visual representation of a map pin based on the specified type. 
+It uses different icons for different types of pins (e.g., restaurant, pizza, vegan) and styles them with a consistent background and color scheme. 
+The size of the pin can be adjusted through the size prop, allowing for flexibility in how the pins are displayed on the map.
+*/
 export function MapPinVisual({ type, size = 50 }: { type: MapPinType; size?: number }) {
 	let icon;
 	switch (type) {
@@ -36,6 +43,14 @@ export function MapPinVisual({ type, size = 50 }: { type: MapPinType; size?: num
 
 const iconCache = new Map<string, L.DivIcon>();
 
+
+/*
+getMapPinIcon
+This function generates a Leaflet DivIcon for a map pin based on the specified type and size. 
+It uses a cache to store previously generated icons, so if an icon with the same type and size is requested again, it can be retrieved from the cache instead of being recreated. 
+The icon is created by rendering the MapPinVisual component to static markup and then using that markup as the HTML content for the DivIcon. 
+The icon's size, anchor, and popup anchor are set based on the specified size to ensure proper positioning on the map.
+*/
 function getMapPinIcon(type: MapPinType, size: number) {
 	const key = type + ":" + size;
 	const cached = iconCache.get(key);
@@ -53,6 +68,12 @@ function getMapPinIcon(type: MapPinType, size: number) {
 	return created;
 }
 
+/*
+MapPinMarker
+This function component renders a map marker at a specified position with a given type and size. 
+It uses the getMapPinIcon function to generate the appropriate icon for the marker based on the type and size props. 
+The marker also has an optional popup that can display additional information when clicked, and it triggers the setRestaurantEvent callback when the marker is clicked, allowing for interaction with the marker on the map.
+*/
 export default function MapPinMarker({
 	position,
 	type,

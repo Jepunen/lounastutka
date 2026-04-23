@@ -4,6 +4,8 @@ import { IoCallOutline, IoEarthOutline, IoLocationOutline } from "react-icons/io
 
 
 const CardContactSection = ({ phone, website, tags = [], address }: { phone?: string; website?: string; tags?: string[]; address?: string }) => {
+
+  // CardContactSection component is responsible for displaying the contact information of a restaurant, including phone number, website, address, and tags. It conditionally renders each piece of information if it is available and styles them appropriately for better user experience.
   return (
     <>
       {

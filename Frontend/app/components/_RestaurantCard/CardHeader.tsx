@@ -5,8 +5,9 @@ import Rating from "../Rating";
 
 
 const CardHeader = ({ name, category, stars, reviews, distanceLabel }: { name: string; category: string; stars: number; reviews: number; distanceLabel?: string }) => {
-  return (
 
+  // CardHeader component is responsible for displaying the main information about a restaurant, including its name, category, rating (stars and reviews), and distance from the user's location. It also includes a placeholder for the restaurant's image. The component is designed to be visually appealing and informative, providing users with a quick overview of the restaurant at a glance.
+  return (
     <div className="flex gap-3 items-start">
       <div className="w-24 h-24 rounded-xl bg-gray flex items-center justify-center text-4xl text-dark/40 shrink-0">
         <IoImageOutline />

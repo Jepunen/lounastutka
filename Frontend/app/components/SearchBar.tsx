@@ -7,6 +7,13 @@ export interface SearchBarProps {
   className?: string;
 }
 
+/*
+SearchBar
+This component renders a search bar with an input field and a search icon. 
+It accepts props for the current value of the input, a callback function to handle changes to the input value, an optional placeholder text, and an optional className for additional styling.
+The input field is styled to be visually appealing and user-friendly, with a background color, rounded corners, and padding. 
+The search icon is displayed on the left side of the input field, and the entire search bar is designed to be responsive and fit well within the layout of the application.
+*/
 const SearchBar = ({ value, onChange, placeholder = "Haku...", className = "" }: SearchBarProps) => {
   return (
     <div className={`flex items-center gap-2 bg-primary rounded-4xl px-4 py-3 border shadow-lg ${className}`}>

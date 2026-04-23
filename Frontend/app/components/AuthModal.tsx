@@ -15,6 +15,13 @@ const fieldAnim = {
   transition: { duration: 0.2 },
 };
 
+/*
+AuthForm
+This component renders a user authentication form that includes both sign-in and sign-up panels. 
+The sign-in panel allows users to enter their email and password to log in, as well as an option to reset their password. The sign-up panel allows new users to create an account by entering their email and password, with a confirmation field for the password. 
+The component uses the useAuth hook to handle authentication logic, including logging in and registering with both password and passkey options. 
+It also includes error handling to display any authentication errors that may occur during the login or registration process.
+*/
 export default function AuthForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   // Sign in state
   const [loginEmail, setLoginEmail] = useState("");

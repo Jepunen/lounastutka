@@ -11,11 +11,20 @@ import SearchBar from "~/components/SearchBar";
 import { calculateDistanceMeters, formatDistance } from "~/utils/distance";
 import { useUserLocation } from "~/components/UserLocationProvider";
 
+
+/*
+Home
+This is the main component for the home page of the application. It sets up the map and manages the state for the visible restaurants, the selected restaurant, and the user's location. 
+It uses several custom components to handle different aspects of the map behavior, such as tracking the map bounds, centering the map on a selected restaurant, and controlling the user's location. 
+The component also includes a sidebar that displays a list of visible restaurants and a mobile sheet that shows details for the selected restaurant.
+*/
 export const Route = createFileRoute("/")({
   component: Home,
 });
 
 function Home() {
+
+  // states for managing the map behavior and restaurant selection
   const animateRef = useRef(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [restaurantSelected, setRestaurantSelected] = useState<Place | null>(null);
@@ -24,6 +33,7 @@ function Home() {
   const { position: userPosition } = useUserLocation();
   const { places } = usePlaces();
 
+  // memoized values for places with distance information, visible places with distance information, and the selected restaurant with distance information.
   const placesWithDistance = useMemo<PlaceWithDistance[]>(
     () =>
       places.map((place) => ({
@@ -34,6 +44,7 @@ function Home() {
     [userPosition, places],
   );
 
+  // visiblePlacesWithDistance is a memoized value that combines the list of visible places with the distance information from placesWithDistance.
   const visiblePlacesWithDistance = useMemo<PlaceWithDistance[]>(
     () =>
       visiblePlaces
@@ -45,6 +56,8 @@ function Home() {
     [placesWithDistance, visiblePlaces],
   );
 
+  // selectedRestaurantWithDistance is a memoized value that finds the selected restaurant in the 
+  // placesWithDistance list to get its distance information, or falls back to the selected restaurant without distance information if it is not found.
   const selectedRestaurantWithDistance = useMemo(
     () => (restaurantSelected ? placesWithDistance.find((place) => place.id === restaurantSelected.id) ?? restaurantSelected : null),
     [placesWithDistance, restaurantSelected],

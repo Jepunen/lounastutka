@@ -28,6 +28,13 @@ export interface RestaurantCardProps {
   onViewMenu?: () => void;
 }
 
+/*
+RestaurantCard
+This component is responsible for displaying a restaurant's information in a card format. 
+It includes a header with the restaurant's name, category, rating, and distance, as well as an expandable section that shows additional details such as the restaurant's description, today's hours, lunch time, price level, menu, and contact information. 
+The component uses framer-motion for smooth animations when expanding and collapsing the details section. 
+The onToggleMoreInfo callback is triggered when the user clicks the button to show more information, allowing the parent component to control the expanded state of the card.
+*/
 const RestaurantCard = ({
   restaurant,
   isExpanded = false,
