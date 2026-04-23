@@ -44,7 +44,6 @@ function Home() {
     [userPosition, places],
   );
 
-  // visiblePlacesWithDistance is a memoized value that combines the list of visible places with the distance information from placesWithDistance.
   const visiblePlacesWithDistance = useMemo<PlaceWithDistance[]>(
     () =>
       visiblePlaces
@@ -55,6 +54,17 @@ function Home() {
         .sort((left, right) => (left.distanceMeters ?? Number.POSITIVE_INFINITY) - (right.distanceMeters ?? Number.POSITIVE_INFINITY)),
     [placesWithDistance, visiblePlaces],
   );
+
+  const filteredPlaces = useMemo<PlaceWithDistance[]>(() => {
+    const q = searchValue.toLowerCase();
+    if (q === "") return visiblePlacesWithDistance;
+    return visiblePlacesWithDistance.filter(
+      (place) =>
+        place.name.toLowerCase().includes(q) ||
+        place.category.toLowerCase().includes(q) ||
+        place.tags?.some((tag) => tag.toLowerCase().includes(q)),
+    );
+  }, [searchValue, visiblePlacesWithDistance]);
 
   // selectedRestaurantWithDistance is a memoized value that finds the selected restaurant in the 
   // placesWithDistance list to get its distance information, or falls back to the selected restaurant without distance information if it is not found.
@@ -106,7 +116,7 @@ function Home() {
       <SideBar
         isOpen={sidebarOpen}
         onToggleOpen={() => setSidebarOpen((open) => !open)}
-        visiblePlaces={visiblePlacesWithDistance}
+        visiblePlaces={filteredPlaces}
         restaurantSelected={restaurantSelected}
         onSelectRestaurant={setRestaurantSelected}
       />
