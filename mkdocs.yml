@@ -9,6 +9,7 @@ nav:
       - Overview: frontend/index.md
       - Map and List Behavior: frontend/map-and-list-behavior.md
       - Component Catalog: frontend/component-catalog-and-design-rules.md
+      - Design Patterns: frontend/design-patterns.md
   - Architecture:
       - Description: architecture/index.md
       - Microservice: architecture/microservice.md
