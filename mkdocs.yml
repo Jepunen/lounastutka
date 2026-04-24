@@ -3,33 +3,36 @@ site_name: Lounastutka Documentation
 nav:
   - Home: index.md
   - Installation: installation.md
-  - Frontend: frontend/index.md
   - Backend: backend/index.md
   - Database: database/index.md
-  - Architecture: 
-    - Description: architecture/index.md
-    - Microservice: architecture/microservice.md
-    - Deployment: architecture/deployment.md
-    - Data flow: architecture/dataflow.md
-    - Use-case: architecture/usecase.md
+  - Frontend:
+      - Overview: frontend/index.md
+      - Map and List Behavior: frontend/map-and-list-behavior.md
+      - Component Catalog: frontend/component-catalog-and-design-rules.md
+  - Architecture:
+      - Description: architecture/index.md
+      - Microservice: architecture/microservice.md
+      - Deployment: architecture/deployment.md
+      - Data flow: architecture/dataflow.md
+      - Use-case: architecture/usecase.md
   - Environment:
-    - Platform:
-      - Hetzner: environment/hetzner.md
-      - Docker: environment/docker.md
-    - Deployment:
-      - GitHub Actions: environment/github-actions.md
-    - Routing:
-      - Traefik: environment/traefik.md
-      - Nginx: environment/nginx.md
-    - Data:
-      - PostgreSQL: environment/postgre.md
-    - Observability:
-      - Prometheus: environment/prometheus.md
-      - Grafana: environment/grafana.md
-      - Loki: environment/loki.md
-      - Promtail: environment/promtail.md
-    - Management:
-      - Portainer: environment/portainer.md
+      - Platform:
+          - Hetzner: environment/hetzner.md
+          - Docker: environment/docker.md
+      - Deployment:
+          - GitHub Actions: environment/github-actions.md
+      - Routing:
+          - Traefik: environment/traefik.md
+          - Nginx: environment/nginx.md
+      - Data:
+          - PostgreSQL: environment/postgre.md
+      - Observability:
+          - Prometheus: environment/prometheus.md
+          - Grafana: environment/grafana.md
+          - Loki: environment/loki.md
+          - Promtail: environment/promtail.md
+      - Management:
+          - Portainer: environment/portainer.md
 
 watch:
   - mkdocs.yml
