@@ -75,6 +75,7 @@ def scrape_aalef():
         "todayMenu": menu_items[:5],
     }
 
+# randomize locations for lappeenranta restaurants
 def random_lappeenranta_coords():
     center_lat = 61.058
     center_lon = 28.188
@@ -84,6 +85,7 @@ def random_lappeenranta_coords():
         round(random.gauss(center_lon, 0.03), 6),
     ]
 
+# the actual route
 @app.post("/scrape")
 def scrape(request: ScrapeRequest):
     url = request.urls.lower()
@@ -93,7 +95,7 @@ def scrape(request: ScrapeRequest):
 
     return get_mock_restaurant()
 
-
+# testing purposes
 @app.get("/health")
 def health():
     return {"status": "ok"}
