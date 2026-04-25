@@ -1,4 +1,29 @@
-## Microservice architecture
+# Microservice architecture
+
+## Purpose
+
+The microservice is responsible for retrieving and generating restaurant and lunch menu data for the Lounastutka system.
+
+It acts as a dedicated data provider between the backend and external (or simulated) data sources.
+
+---
+
+## Responsibilities
+
+* Accept a restaurant URL from the backend
+* Return structured restaurant data
+
+---
+
+## Architecture Role
+
+```text
+Frontend → Backend → Microservice → Backend → Database → Frontend
+```
+
+The microservice is **not exposed publicly** and is only accessible within the Docker network.
+
+---
 
 **Containers:**
 
