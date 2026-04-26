@@ -4,6 +4,7 @@ nav:
   - Home: index.md
   - Installation: installation.md
   - Backend: backend/index.md
+  - Microservice: microservice/index.md
   - Database: database/index.md
   - Frontend:
       - Overview: frontend/index.md
@@ -12,7 +13,7 @@ nav:
       - Design Patterns: frontend/design-patterns.md
   - Architecture:
       - Description: architecture/index.md
-      - Microservice: architecture/microservice.md
+      - Structure: architecture/structure.md
       - Deployment: architecture/deployment.md
       - Data flow: architecture/dataflow.md
       - Use-case: architecture/usecase.md
@@ -40,6 +41,7 @@ watch:
   - Backend/README.md
   - Frontend/README.md
   - Database/README.md
+  - microservice/README.md
   - docs/
 
 theme: readthedocs
