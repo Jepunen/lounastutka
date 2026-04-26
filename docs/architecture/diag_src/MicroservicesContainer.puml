@@ -3,7 +3,7 @@
 !NEW_C4_STYLE=1
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
-title Microservice Component Architecture – Lounastutka System
+title Main Component Architecture – Lounastutka System
 
 ' src: https://github.com/plantuml-stdlib/C4-PlantUML
 ' C4 video: https://www.youtube.com/watch?v=x2-rSnhpw0g

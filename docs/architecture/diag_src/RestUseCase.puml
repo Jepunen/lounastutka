@@ -5,6 +5,8 @@
 
 title Use Case – Restaurant User Adding Restaurant Information
 
+top to bottom direction
+
 ' The user
 actor "Restaurant User" as RestUser
 
@@ -21,14 +23,14 @@ rectangle "Lounastutka Web Application" {
 }
 
 ' Relations 
-RestUser --> UC1 : navigates to
-RestUser --> UC2 : authenticates
-RestUser --> UC3 : enters management view
-RestUser --> UC4 : fills form
-RestUser --> UC5 : submits URL
-RestUser --> UC6 : if successful
-RestUser --> UC7 : if failed
-RestUser --> UC8 : closes session
+RestUser --down-> UC1 : navigates to
+RestUser --down-> UC2 : authenticates
+RestUser --down-> UC3 : enters management view
+RestUser --down-> UC4 : fills form
+RestUser --down-> UC5 : submits URL
+RestUser --down-> UC6 : if successful
+RestUser --down-> UC7 : if failed
+RestUser --down-> UC8 : closes session
 
 UC2 --> UC3 : grants access
 UC4 --> UC6 : success
