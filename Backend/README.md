@@ -1,8 +1,10 @@
 # Backend
 
-### Setup: 
+Basic information regarding development and structure of the backend is described here. This is not supposed to be an indepth manual and explanation of the design decisions but a high overview of the initial idea for the structure and whats where.
 
-You need to have bun.js installed: https://bun.com/docs/installation 
+## Setup: 
+
+You need to have bun.js installed: [bun.js installation](https://bun.com/docs/installation)
 
 Install dependencies for the application backend:
 
@@ -72,11 +74,11 @@ The backend is divided to the following structure:
 
 Current dependencies can be found in the `package.json` file and package versions should be updated when vulneraibility patches come. 
 
-About the files, folders and their ideas:
+#### About the files, folders and their ideas:
 
 **index.ts:** Entry to the backend application, defines the used features, e.g. express, cors etc.
 
-**utils/:** Global utility methods and classes should lay here as they can be easily imported to the relevant source code files. E.g error handler
+**utils/:** Global utility methods and classes should lay here as they can be easily imported to the relevant source code files. E.g AppError.
 
 **routes/:** routes that can be called to the backend defined here and which middleware are used, e.g. with this defined in index.ts:
 `app.use("/api/protected", protectedRoutes);`
@@ -89,15 +91,15 @@ and in routes/protected.routes.ts
 
 **database/:** Acts as API to the database service, containing the database schema based typescript models and including the methods that make the database SQL queries via bun.js SQL library. It also has the connection initialization and its usage should be as easy as importing it to a service file and using e.g. `await db.findUserByID(...)`. 
 
-**middlewares/:** This folder includes all of the custom middleware methods such as email & password verification and token verification and custom error handler for express.
+**middleware/:** This folder includes all of the custom middleware methods such as email & password verification and token verification and custom error handler for express.
 
 
 #### API Documentation
 
-The API documentation is built from the developer written `typedoc` [style](https://typedoc.org/) code comments and typedoc parsed method declarations. The documentation index.html can be created with:
+The API documentation is built from the developer written `typedoc` and `JSDoc` [style](https://typedoc.org/) code comments and typedoc parsed method declarations. This is not the best way to do API documentation but considering the small codebase at this point it seemed to suffice, as the project grows it is beneficial to move towards e.g. OpenAPI style documentation format. The documentation index.html can be created with:
 
 ```bash
-[Backend]$ bun run typedoc --entryPointStrategy Expand routes/* controllers/* middleware/* 
+[Backend]$ bun run typedoc --entryPointStrategy Expand controllers/* middleware/* 
 ```
 
 , this should create the new html files under `Backend/docs/` folder. 
