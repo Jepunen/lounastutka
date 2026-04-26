@@ -81,16 +81,4 @@ docker stack rm lounastutka
 - Prometheus and Loki are included in Swarm mode and are internal by default.
 - For real production, move credentials from Compose files into a secret manager.
 
-## Documentation Commands
 
-Build docs:
-
-```bash
-mkdocs build
-```
-
-Serve docs locally:
-
-```bash
-mkdocs serve
-```
